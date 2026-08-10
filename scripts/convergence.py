@@ -17,11 +17,19 @@ DESIGN NOTE, read before comparing anything.
   The comparison that matters is the FINAL checkpoint against the untrained
   floor at the same seed, and that one is exact.
 
-Pre-registered gate (RESEARCH_PLAN.md E1):
-  MLP R^2 exceeds the untrained floor by > 2 pooled SD at any checkpoint
+Pre-registered gate (RESEARCH_PLAN.md E1), wording corrected after the first run:
+  MLP R^2 at the FINAL checkpoint exceeds the untrained floor by > 2 pooled SD,
+  AND the trajectory is non-decreasing over the last two checkpoints
       -> the objective does learn; the 600-step null was a budget artefact
-  no separation by the final step
+  no separation at the final checkpoint
       -> strong negative; proceed to E3
+  separation at an early checkpoint that then reverses
+      -> also a strong negative, and a more interesting one
+
+The original criterion said "at any checkpoint", which a transient early peak
+satisfies while the trajectory reverses. The first run hit exactly that case:
++3.30 pooled SD at step 600, then -23.17 by step 19,200. The transient is still
+reported, it is just no longer allowed to decide.
 """
 import argparse
 import json
@@ -188,16 +196,33 @@ def main():
         if sep > 2.0 and sep_step is None:
             sep_step = c
     res["by_step"] = by_step
+    # The gate keys on the FINAL checkpoint, not on any checkpoint. An earlier
+    # version keyed on "any", which a transient early peak satisfies while the
+    # trajectory reverses; that cannot answer whether more training helps. The
+    # first run of this script hit exactly that case, so the transient is still
+    # reported, just no longer allowed to decide.
+    fin = by_step.get(cks[-1]) if cks else None
+    fin_sep = fin["mlp_lift_in_pooled_sd"] if fin else float("nan")
+    rising = (len(cks) >= 2 and by_step.get(cks[-1]) and by_step.get(cks[-2])
+              and by_step[cks[-1]]["mlp_mean"] >= by_step[cks[-2]]["mlp_mean"])
+    separated = bool(fin and fin_sep > 2.0 and rising)
     res["gate"] = {
-        "criterion": "MLP R^2 exceeds untrained floor by > 2 pooled SD at any checkpoint",
-        "separated": sep_step is not None,
-        "separation_step": sep_step,
-        "verdict": ("SEPARATES at step {}: the objective does learn and the 600-step "
-                    "null was a budget artefact. Re-run E4 and the causal 2x2 at this "
-                    "budget.".format(sep_step) if sep_step else
-                    "NO SEPARATION by step {}: strong negative. The objective adds no "
-                    "probe-visible information at any budget tested. Proceed to E3."
-                    .format(args.steps)),
+        "criterion": ("MLP R^2 at the FINAL checkpoint exceeds the untrained floor by "
+                      "> 2 pooled SD, AND the trajectory is non-decreasing over the "
+                      "last two checkpoints"),
+        "separated": separated,
+        "final_mlp_lift_in_pooled_sd": fin_sep,
+        "trajectory_rising_at_end": bool(rising),
+        "transient_peak_step": sep_step,
+        "verdict": ("SEPARATES at the final checkpoint: the objective does learn and "
+                    "the 600-step null was a budget artefact. Re-run E4 and the causal "
+                    "2x2 at this budget." if separated else
+                    ("PEAKS AT STEP {} THEN REVERSES: strong negative, and the "
+                     "interesting kind. The objective destroys information it briefly "
+                     "had. Final MLP is {:+.2f} pooled SD from the untrained floor. "
+                     "Proceed to E3.".format(sep_step, fin_sep) if sep_step else
+                     "NO SEPARATION by step {}: strong negative. Proceed to E3."
+                     .format(args.steps))),
     }
 
     print("\n" + "=" * 86)

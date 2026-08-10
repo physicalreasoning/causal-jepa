@@ -215,10 +215,77 @@ will show up as a zero in the logs rather than as a silent no-op.
 
 ---
 
+## 8. More training makes it worse, and effective rank moves opposite to utility
+
+Added 2026-08-10 from `results/convergence.json`, E1 in `RESEARCH_PLAN.md`. 3 seeds, 19,200
+steps, one long cosine schedule probed at six checkpoints. This retires finding 2's main caveat.
+
+| step | ridge | MLP | MLP vs untrained floor | copy_align | eff_rank |
+|---|---|---|---|---|---|
+| floor | +0.3443 +- 0.0073 | +0.3829 +- 0.0016 | | | |
+| 600 | +0.4006 | +0.3966 | **+3.30 sd** | 0.972 | 36.4 |
+| 1200 | +0.4047 | +0.3860 | +0.21 sd | 0.969 | 47.1 |
+| 2400 | +0.4003 | +0.3198 | -1.64 sd | 0.951 | 64.1 |
+| 4800 | +0.3932 | +0.3307 | -1.49 sd | 0.941 | 80.0 |
+| 9600 | +0.3961 | +0.3089 | -3.44 sd | 0.925 | 92.3 |
+| 19200 | +0.3965 | +0.3055 | **-23.17 sd** | 0.940 | 93.8 |
+
+**32x more compute does not help.** Ridge is flat, +0.4006 to +0.3965. The MLP probe peaks at
+the first checkpoint and falls 0.091, ending 23 pooled standard deviations **below** the
+untrained encoder. The 600-step budget that every prior conclusion rests on was not a constraint;
+it was near the best point on the curve. Finding 2's stated threat, "600 steps may simply be too
+few", is closed.
+
+**Effective rank triples while utility falls**, 36.4 to 93.8. Rank is not merely blind to this
+failure mode, it moves in the opposite direction to the thing we care about. It must never be
+read as a health signal on this data.
+
+**Copying falls and it does not help.** `copy_alignment` drops 0.972 to 0.940 with training while
+the probes get worse. Third independent confirmation that the copy diagnostic does not predict
+downstream utility.
+
+**The pre-registered gate fired and was wrong, and that is recorded rather than patched.** The
+criterion read "exceeds the floor by > 2 pooled SD at any checkpoint", which the transient +3.30
+at step 600 satisfies. "Any checkpoint" cannot answer whether more training helps. The recorded
+`gate` in the JSON is left exactly as the run produced it; the correction lives beside it in
+`gate_review`, and `RESEARCH_PLAN.md` now shows the old wording struck rather than replaced. A
+plan that silently edits its criteria after seeing data is worth nothing.
+
+## 9. The readout was hiding half the result, and the bar was too low
+
+Added 2026-08-10 from `results/readout_ablation.json`, E4. This **corrects finding 2**.
+
+Finding 2 reported that training buys linear accessibility and nothing an MLP probe can see. That
+is true only for `mean_all`, the readout averaging over both the patch and strike axes:
+
+| readout | dim | trained MLP | untrained MLP | lift | t |
+|---|---|---|---|---|---|
+| `last_patch` | 128 | +0.4217 | +0.3671 | **+0.0545** | **7.73** |
+| `mean_max` | 256 | +0.4158 | +0.3432 | **+0.0726** | **6.02** |
+| `concat_patches` | 768 | +0.4108 | +0.3719 | +0.0389 | 2.41 |
+| `mean_all` | 128 | +0.3797 | +0.3802 | -0.0005 | -0.12 |
+| `concat_strikes` | 3072 | +0.4213 | +0.4102 | +0.0111 | 1.17 |
+
+`last_patch` is the same width as `mean_all`, so this is not a dimension effect. The encoder does
+learn something a nonlinear probe can see; our pooling was destroying it.
+
+**And the bar was too low.** The programme measured against pm-jepa's identity control at
++0.4491, which is not the strongest trivial baseline, nor even the strongest at its own width:
+`raw_last_min` at 96 dimensions scores +0.4754, and the raw window at 2304 dimensions scores
++0.5091 ridge and +0.5586 MLP. Best JEPA readout is +0.4529 and +0.4213, so the real gap is 0.06
+on ridge and 0.14 on MLP, **wider** than finding 3 reported. Correcting the first error made the
+overall result worse.
+
+**The gate nearly fired spuriously.** `concat_strikes` at 3072 dimensions beats the 96-dimensional
+identity control, which reads as "readout artefact, stop everything". But the untrained encoder at
+that same width scores +0.4423, so almost all of it was dimension. Dimension-matched raw controls
+are what turned a false positive into the correct verdict.
+
 ## What this work did not establish
 
-- Whether a longer run separates the trained encoder from its random initialisation. Finding 2
-  rests on 600 steps and is the main threat to every other conclusion here.
+- ~~Whether a longer run separates the trained encoder from its random initialisation.~~
+  **Closed by finding 8.** It does not. 32x more compute leaves ridge flat and drives the MLP
+  probe 23 pooled standard deviations below the untrained floor.
 - Whether any of this transfers off the Kalshi hourly-crypto corpus. One corpus, one asset
   class, one venue.
 - Whether the marginal causal-context effect in finding 4 survives more seeds. At t = 2.56 with

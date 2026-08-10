@@ -62,14 +62,28 @@ the untrained encoder at the same seeds as the floor. Record ridge, MLP, `copy_a
 `eff_rank`, and `reg_grad_norm` at every checkpoint. Training one long run and probing at
 checkpoints costs a sixth of training six separate runs; do it that way.
 
-**Gate.**
-- MLP R² of the trained encoder exceeds the untrained floor by more than 2 pooled standard
-  deviations at any checkpoint: **the objective does learn, and the 600-step null was a budget
-  artefact.** Record the step where separation appears, and re-run E4 and the causal 2x2 at that
-  budget.
-- No separation by 19200 steps: **strong negative.** The JEPA objective adds no probe-visible
-  information on this corpus at any budget we can afford. Proceed to E3, which becomes the
-  explanation rather than a side quest.
+**Gate.** *(Wording corrected 2026-08-10 after the first run. The original said "at any
+checkpoint", which a transient early peak satisfies without answering the question the gate was
+for. The run itself is unaffected; see `results/convergence.json:gate_review`. Kept visible
+rather than silently patched, because a plan that edits its own criteria after seeing data is
+worth nothing.)*
+
+- MLP R² **at the final checkpoint** exceeds the untrained floor by more than 2 pooled standard
+  deviations, **and** the trajectory is non-decreasing over the last two checkpoints: **the
+  objective does learn, and the 600-step null was a budget artefact.** Re-run E4 and the causal
+  2x2 at that budget.
+- No separation at the final checkpoint: **strong negative.** The JEPA objective adds no
+  probe-visible information on this corpus at any budget we can afford. Proceed to E3, which
+  becomes the explanation rather than a side quest.
+- Separation appears at an early checkpoint and then reverses: **also a strong negative, and a
+  more interesting one.** Report the peak and the reversal; the objective is destroying
+  information it briefly had.
+
+**Result (2026-08-10).** The third branch. 3 seeds, 19,200 steps. Ridge is flat from step 600
+(+0.4006) to step 19,200 (+0.3965). MLP peaks at step 600 (+0.3966, +3.30 SD over floor) and
+falls to +0.3055, ending **23 pooled SD below the untrained floor**. Effective rank nearly
+triples, 36.4 to 93.8, while utility falls. `copy_alignment` falls 0.972 to 0.940 and the probes
+get worse anyway. Proceed to E3.
 
 **Cost.** 2.0 hours on MPS. Measured, not guessed: the four arms in `results/causal_ablation.json`
 averaged 0.123 s/step at d_model 128 and 4 layers, so 19,200 steps times 3 seeds is 2.0 h. Run it
