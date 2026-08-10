@@ -53,7 +53,12 @@ oracles disagree about which positions are copyable at all.
 
 ## 2. The MLP probe cannot distinguish a trained encoder from an untrained one
 
-This is the result that matters, and it was not what we set out to test.
+> **Superseded in part by finding 9.** This holds only for the `mean_all` readout. At the same
+> 128 dimensions, `last_patch` shows the trained encoder beating its own initialisation by
+> +0.0545 at t = 7.73. The null was our pooling, not the objective. Finding 8 separately closes
+> the "600 steps may be too few" objection below: it is not, and more training makes it worse.
+
+This was the result that mattered, and it was not what we set out to test.
 
 An untrained encoder, identical architecture, no optimiser, no steps, no EMA, mean-pooled over
 the same token grid:
@@ -87,6 +92,10 @@ experiment in this repo.
 ---
 
 ## 3. Every arm still loses to the raw cross-section
+
+> **Bar corrected by finding 9.** The controls below are the ones this programme inherited, and
+> they are not the strongest trivial baselines. Raw features at 2304 dimensions reach +0.5091
+> ridge and +0.5586 MLP. The real gap is 0.06 and 0.14, wider than what this section states.
 
 The controls, measured in `pm-jepa/results/baselines.json` before any model existed, remain
 unbeaten:
