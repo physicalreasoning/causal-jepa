@@ -369,6 +369,35 @@ This is the second confound of exactly this shape in one day, after the readout-
 finding 9. Both were caught only by adding a matched control. On this data, any comparison
 between things of different dimension is untrustworthy until the dimension is matched.
 
+## 12. Observation noise does not explain the gap either, and the JEPA is noise-robust
+
+Added 2026-08-10 from `results/sim_vs_real.json`, E3 part A. The second of two pre-registered
+explanations, and the second one refuted.
+
+Scaling the simulator's quote noise degrades the observations without touching the latent state.
+The plan predicted the JEPA's advantage over the identity control would shrink and cross zero
+somewhere, giving a threshold to locate the real corpus against. It does the opposite:
+
+| noise multiplier | identity | jepa-slate | advantage |
+|---|---|---|---|
+| 0.5x | +0.8239 | +0.8928 +- 0.0096 | +0.0690 |
+| 1x | +0.8229 | +0.8823 +- 0.0187 | +0.0594 |
+| 2x | +0.8153 | +0.8791 +- 0.0116 | +0.0638 |
+| 4x | +0.7952 | +0.8618 +- 0.0006 | +0.0666 |
+| 8x | +0.7538 | +0.8466 +- 0.0014 | +0.0928 |
+| 16x | +0.6734 | +0.8237 +- 0.0004 | **+0.1502** |
+
+**The advantage never crosses zero, and across a 32x range of noise it more than doubles.** Raw
+features degrade quickly under noise, +0.8239 to +0.6734, while the learned representation barely
+moves, +0.8928 to +0.8237. That is the expected behaviour of an encoder that averages over a
+window and a cross-section, and it is a genuine positive result about the objective: **where
+there is real latent state to find, a JEPA is markedly more noise-robust than raw features, and
+the noisier the data the more it is worth.**
+
+It also means observation SNR cannot be the sim-to-real story. Both pre-registered explanations
+for the gap, redundancy in finding 11 and noise here, are refuted. What is left is finding 10:
+the real corpus's target set contains no hidden state to recover.
+
 ## What this work did not establish
 
 - ~~Whether a longer run separates the trained encoder from its random initialisation.~~

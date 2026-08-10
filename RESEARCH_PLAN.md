@@ -133,6 +133,21 @@ whether it beats the identity control. That yields a **threshold**: the SNR belo
 objective stops adding value. Then locate the real corpus on the same axis, by measuring the same
 latent-recoverability statistic on Kalshi data that the simulator sweep varies.
 
+**Result (2026-08-10). Neither pre-registered explanation survived; the answer came from a
+third measurement the plan did not anticipate.**
+
+- *Noise (part A): refuted, in the opposite direction.* The JEPA's advantage over identity never
+  crosses zero and more than doubles across a 32x noise range, +0.0594 at baseline to +0.1502 at
+  16x. Raw features degrade under noise and the learned representation does not, which is a
+  genuine positive result about the objective rather than a null.
+- *Redundancy (part B): refuted by its own control.* Kalshi looked far more redundant than the
+  simulator, residual 1.5% against 4.6%, but that is a predictor-count artefact of 24 markets
+  versus 8. At matched K, Kalshi has more residual structure, not less.
+- *Target decomposition (part C): the answer.* The headline metric is a mean over four targets,
+  one of which `dataset.py` itself calls a derivable sanity check and which is where nearly the
+  whole raw-versus-JEPA gap lives. On the only genuinely future target, all 16 arms sit in
+  [-0.0043, +0.0510]. There is no hidden state in the target set for the objective to find.
+
 **Gate.**
 - Real data sits below the threshold: **the programme's negative results are explained, and the
   explanation is a property of prediction markets rather than of our models.** That is the

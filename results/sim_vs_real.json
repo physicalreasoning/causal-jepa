@@ -1,0 +1,143 @@
+{
+  "config": {
+    "noise_scales": "0.5,1,2,4,8,16",
+    "seeds": 2,
+    "arm": "slate",
+    "games_train": 1200,
+    "games_test": 300,
+    "windows_per_game": 6,
+    "window": 48,
+    "steps": 1500,
+    "batch": 64,
+    "d_model": 128,
+    "layers": 4,
+    "pm_jepa_root": "/Users/nikita/pm-jepa",
+    "device": "auto",
+    "out": "results/sim_vs_real.json"
+  },
+  "device": "mps",
+  "sweep": [
+    {
+      "noise_scale": 0.5,
+      "identity_ridge": 0.8238931658778107,
+      "identity_mlp": 0.9277610778808594,
+      "jepa_ridge_mean": 0.8928496996097899,
+      "jepa_ridge_std": 0.009612721751411535,
+      "jepa_mlp_mean": 0.9092917740345001,
+      "advantage": 0.06895653373197919,
+      "seeds": 2
+    },
+    {
+      "noise_scale": 1.0,
+      "identity_ridge": 0.8228814704000218,
+      "identity_mlp": 0.9205471873283386,
+      "jepa_ridge_mean": 0.8823130873811398,
+      "jepa_ridge_std": 0.018720522330871237,
+      "jepa_mlp_mean": 0.9011833071708679,
+      "advantage": 0.059431616981117985,
+      "seeds": 2
+    },
+    {
+      "noise_scale": 2.0,
+      "identity_ridge": 0.8153077875640915,
+      "identity_mlp": 0.8995562195777893,
+      "jepa_ridge_mean": 0.8791380360247621,
+      "jepa_ridge_std": 0.011568354890115762,
+      "jepa_mlp_mean": 0.8911796808242798,
+      "advantage": 0.06383024846067065,
+      "seeds": 2
+    },
+    {
+      "noise_scale": 4.0,
+      "identity_ridge": 0.7952170166448987,
+      "identity_mlp": 0.8558438420295715,
+      "jepa_ridge_mean": 0.861793581383347,
+      "jepa_ridge_std": 0.0006433288563071349,
+      "jepa_mlp_mean": 0.8669006824493408,
+      "advantage": 0.06657656473844831,
+      "seeds": 2
+    },
+    {
+      "noise_scale": 8.0,
+      "identity_ridge": 0.7537512094438572,
+      "identity_mlp": 0.7687556147575378,
+      "jepa_ridge_mean": 0.8465720859659359,
+      "jepa_ridge_std": 0.001436621706719654,
+      "jepa_mlp_mean": 0.8393285274505615,
+      "advantage": 0.09282087652207871,
+      "seeds": 2
+    },
+    {
+      "noise_scale": 16.0,
+      "identity_ridge": 0.6734286976826254,
+      "identity_mlp": 0.5936372876167297,
+      "jepa_ridge_mean": 0.8236540785767043,
+      "jepa_ridge_std": 0.0004344665485447319,
+      "jepa_mlp_mean": 0.803591400384903,
+      "advantage": 0.15022538089407889,
+      "seeds": 2
+    }
+  ],
+  "redundancy": {
+    "simulator": {
+      "per_market": [
+        0.9919382003170376,
+        0.9669017307506249,
+        0.9903886645715568,
+        0.990418849820037,
+        0.965516809262877,
+        0.8847560146427278,
+        0.9557219185443149,
+        0.886442685347052
+      ],
+      "mean": 0.9540106091570284,
+      "median": 0.9662092700067509,
+      "min": 0.8847560146427278,
+      "max": 0.9919382003170376,
+      "k": 8
+    },
+    "kalshi": {
+      "per_market": [
+        0.9740384932355604,
+        0.992771745941855,
+        0.9944918820550926,
+        0.9936596243122782,
+        0.9935127310573854,
+        0.9941316676701625,
+        0.9936958514768924,
+        0.9947247608794534,
+        0.9921309139883987,
+        0.9916166466983918,
+        0.9831146549121236,
+        0.9265585890516779,
+        0.9260037273662001,
+        0.9832836448692084,
+        0.9915244201532657,
+        0.9920777449013778,
+        0.9940562803169259,
+        0.9938205144671636,
+        0.9935115192426566,
+        0.9917711635420727,
+        0.9919241051115784,
+        0.993569965047364,
+        0.992507037826469,
+        0.9711523276550891
+      ],
+      "mean": 0.9849854171574434,
+      "median": 0.9923189759074338,
+      "min": 0.9260037273662001,
+      "max": 0.9947247608794534,
+      "k": 24
+    },
+    "gap": 0.030974808000414966
+  },
+  "crossing_noise_scale": null,
+  "gate": {
+    "criterion": "does observation noise alone explain the sim-to-real gap, and is the Kalshi cross-section more redundant than the simulator's",
+    "advantage_at_baseline_noise": 0.06895653373197919,
+    "crossing_noise_scale": null,
+    "redundancy_simulator": 0.9540106091570284,
+    "redundancy_kalshi": 0.9849854171574434,
+    "kalshi_more_redundant": true
+  }
+}
