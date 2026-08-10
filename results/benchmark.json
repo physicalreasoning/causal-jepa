@@ -1,0 +1,314 @@
+{
+  "config": {
+    "pm_jepa_root": "/Users/nikita/pm-jepa",
+    "seeds": 4,
+    "d_model": 128,
+    "layers": 4,
+    "device": "auto",
+    "out": "results/benchmark.json"
+  },
+  "device": "mps",
+  "corpus": {
+    "shape": [
+      25818,
+      24,
+      24,
+      4
+    ],
+    "n_train": 20506,
+    "n_test": 5312,
+    "target_names": [
+      "log_return_to_settle",
+      "time_to_expiry",
+      "implied_width",
+      "window_log_return"
+    ]
+  },
+  "arms": {
+    "identity (control)": {
+      "ridge_mean": 0.44908884624454815,
+      "ridge_std": 0.0,
+      "mlp_mean": 0.5050081610679626,
+      "mlp_std": 0.0,
+      "source": "pm-jepa/results/baselines.json",
+      "seeds": 1
+    },
+    "temporal (control)": {
+      "ridge_mean": 0.45995955609379624,
+      "ridge_std": 0.0,
+      "mlp_mean": 0.510765790939331,
+      "mlp_std": 0.0,
+      "source": "pm-jepa/results/baselines.json",
+      "seeds": 1
+    },
+    "handcrafted (control)": {
+      "ridge_mean": 0.459517495820561,
+      "ridge_std": 0.0,
+      "mlp_mean": 0.48575878143310547,
+      "mlp_std": 0.0,
+      "source": "pm-jepa/results/baselines.json",
+      "seeds": 1
+    },
+    "random-encoder (bidir)": {
+      "ridge_mean": 0.34557667637463696,
+      "ridge_std": 0.006682406402263122,
+      "mlp_mean": 0.38018952310085297,
+      "mlp_std": 0.004857181521823467,
+      "seeds": 4,
+      "trained": false,
+      "per_target_mean": {
+        "log_return_to_settle": -9.894491017833906e-05,
+        "time_to_expiry": 0.6781315035224612,
+        "implied_width": 0.5785389000886929,
+        "window_log_return": 0.12573524679757206
+      },
+      "runs": [
+        {
+          "ridge": {
+            "log_return_to_settle": -0.0009595606001846502,
+            "time_to_expiry": 0.6695737653442511,
+            "implied_width": 0.5652689053707656,
+            "window_log_return": 0.12180682202225146
+          },
+          "mlp": {
+            "log_return_to_settle": -0.046954989433288574,
+            "time_to_expiry": 0.8219409584999084,
+            "implied_width": 0.6097807884216309,
+            "window_log_return": 0.137961745262146
+          },
+          "ridge_lambda": 1.0,
+          "ridge_mean": 0.33892248303427086,
+          "mlp_mean": 0.3806821405887604,
+          "seconds": 7.0
+        },
+        {
+          "ridge": {
+            "log_return_to_settle": 0.0006452588851882934,
+            "time_to_expiry": 0.6568243715508864,
+            "implied_width": 0.574450926509092,
+            "window_log_return": 0.1256124109949983
+          },
+          "mlp": {
+            "log_return_to_settle": -0.03319263458251953,
+            "time_to_expiry": 0.8202139735221863,
+            "implied_width": 0.6114162802696228,
+            "window_log_return": 0.13794207572937012
+          },
+          "ridge_lambda": 10.0,
+          "ridge_mean": 0.3393832419850412,
+          "mlp_mean": 0.3840949237346649,
+          "seconds": 6.8
+        },
+        {
+          "ridge": {
+            "log_return_to_settle": -0.0018228484345077511,
+            "time_to_expiry": 0.6983412883829938,
+            "implied_width": 0.5934552935117349,
+            "window_log_return": 0.12840147524694978
+          },
+          "mlp": {
+            "log_return_to_settle": -0.051030516624450684,
+            "time_to_expiry": 0.8210444450378418,
+            "implied_width": 0.6335210204124451,
+            "window_log_return": 0.13195639848709106
+          },
+          "ridge_lambda": 1.0,
+          "ridge_mean": 0.35459380217679265,
+          "mlp_mean": 0.3838728070259094,
+          "seconds": 6.8
+        },
+        {
+          "ridge": {
+            "log_return_to_settle": 0.0017413705087907516,
+            "time_to_expiry": 0.6877865888117136,
+            "implied_width": 0.5809804749631795,
+            "window_log_return": 0.12712027892608868
+          },
+          "mlp": {
+            "log_return_to_settle": -0.06971728801727295,
+            "time_to_expiry": 0.8152509927749634,
+            "implied_width": 0.6394768953323364,
+            "window_log_return": 0.10342222452163696
+          },
+          "ridge_lambda": 1.0,
+          "ridge_mean": 0.34940717830244317,
+          "mlp_mean": 0.37210822105407715,
+          "seconds": 7.0
+        }
+      ]
+    },
+    "random-encoder (causal)": {
+      "ridge_mean": 0.33805739621482844,
+      "ridge_std": 0.007886013600312082,
+      "mlp_mean": 0.3723941445350647,
+      "mlp_std": 0.007639353659759082,
+      "seeds": 4,
+      "trained": false,
+      "per_target_mean": {
+        "log_return_to_settle": -0.0009667118786466089,
+        "time_to_expiry": 0.6456893212103982,
+        "implied_width": 0.5574723234972492,
+        "window_log_return": 0.1500346520303131
+      },
+      "runs": [
+        {
+          "ridge": {
+            "log_return_to_settle": -0.0002700447200165712,
+            "time_to_expiry": 0.6278990348152722,
+            "implied_width": 0.535274439705909,
+            "window_log_return": 0.14751561260485957
+          },
+          "mlp": {
+            "log_return_to_settle": -0.043602824211120605,
+            "time_to_expiry": 0.816840410232544,
+            "implied_width": 0.5967369079589844,
+            "window_log_return": 0.16416603326797485
+          },
+          "ridge_lambda": 10.0,
+          "ridge_mean": 0.32760476060150606,
+          "mlp_mean": 0.38353514671325684,
+          "seconds": 7.2
+        },
+        {
+          "ridge": {
+            "log_return_to_settle": -0.0007158520999079876,
+            "time_to_expiry": 0.6357013343022783,
+            "implied_width": 0.5553949656676858,
+            "window_log_return": 0.15034212861237783
+          },
+          "mlp": {
+            "log_return_to_settle": -0.05883646011352539,
+            "time_to_expiry": 0.8120855093002319,
+            "implied_width": 0.612598180770874,
+            "window_log_return": 0.12900924682617188
+          },
+          "ridge_lambda": 10.0,
+          "ridge_mean": 0.33518064412060844,
+          "mlp_mean": 0.3737141191959381,
+          "seconds": 7.1
+        },
+        {
+          "ridge": {
+            "log_return_to_settle": -0.00012715442910593566,
+            "time_to_expiry": 0.6591744329865573,
+            "implied_width": 0.5756904679967865,
+            "window_log_return": 0.1625652296133564
+          },
+          "mlp": {
+            "log_return_to_settle": -0.05928599834442139,
+            "time_to_expiry": 0.8077361583709717,
+            "implied_width": 0.6047080755233765,
+            "window_log_return": 0.12697196006774902
+          },
+          "ridge_lambda": 10.0,
+          "ridge_mean": 0.3493257440418986,
+          "mlp_mean": 0.37003254890441895,
+          "seconds": 7.1
+        },
+        {
+          "ridge": {
+            "log_return_to_settle": -0.002753796265555941,
+            "time_to_expiry": 0.659982482737485,
+            "implied_width": 0.5635294206186154,
+            "window_log_return": 0.1397156372906586
+          },
+          "mlp": {
+            "log_return_to_settle": -0.07277679443359375,
+            "time_to_expiry": 0.8122103214263916,
+            "implied_width": 0.6176186800003052,
+            "window_log_return": 0.09212684631347656
+          },
+          "ridge_lambda": 1.0,
+          "ridge_mean": 0.3401184360953008,
+          "mlp_mean": 0.3622947633266449,
+          "seconds": 7.1
+        }
+      ]
+    },
+    "jepa-temporal (pm-jepa)": {
+      "ridge_mean": 0.3771117371842318,
+      "ridge_std": 0.0094546943834405,
+      "mlp_mean": 0.3226962188879649,
+      "mlp_std": 0.012763093351037353,
+      "source": "pm-jepa/results/seeds.json"
+    },
+    "jepa-contiguous (pm-jepa)": {
+      "ridge_mean": 0.3393797010626984,
+      "ridge_std": 0.006380486428113164,
+      "mlp_mean": 0.32631678382555646,
+      "mlp_std": 0.00445841259045566,
+      "source": "pm-jepa/results/seeds.json"
+    },
+    "jepa-slate (pm-jepa)": {
+      "ridge_mean": 0.3426313984307498,
+      "ridge_std": 0.0059472809804077455,
+      "mlp_mean": 0.31602933009465534,
+      "mlp_std": 0.004231756915359665,
+      "source": "pm-jepa/results/seeds.json"
+    },
+    "ctx=bidir  tgt=bidir [temporal] (this work)": {
+      "ridge_mean": 0.3918764915151961,
+      "ridge_std": 0.005752687245820601,
+      "mlp_mean": 0.3797162398695946,
+      "mlp_std": 0.004871269125678582,
+      "seeds": 4,
+      "source": "results/causal_ablation.json"
+    },
+    "ctx=bidir  tgt=causal [temporal] (this work)": {
+      "ridge_mean": 0.392351917429717,
+      "ridge_std": 0.006910445216735684,
+      "mlp_mean": 0.3809022828936577,
+      "mlp_std": 0.005457955303086137,
+      "seeds": 4,
+      "source": "results/causal_ablation.json"
+    },
+    "ctx=causal tgt=bidir [temporal] (this work)": {
+      "ridge_mean": 0.40178424763818565,
+      "ridge_std": 0.0034476070073302056,
+      "mlp_mean": 0.3872080221772194,
+      "mlp_std": 0.01920783957414326,
+      "seeds": 4,
+      "source": "results/causal_ablation.json"
+    },
+    "ctx=causal tgt=causal [temporal] (this work)": {
+      "ridge_mean": 0.40106854721086843,
+      "ridge_std": 0.0035522377087118806,
+      "mlp_mean": 0.3862468749284744,
+      "mlp_std": 0.012691273827012722,
+      "seeds": 4,
+      "source": "results/causal_ablation.json"
+    },
+    "ctx=bidir  tgt=bidir [interp] (this work)": {
+      "ridge_mean": 0.38956010491507825,
+      "ridge_std": 0.006668365274765415,
+      "mlp_mean": 0.37923118472099304,
+      "mlp_std": 0.002812984367171994,
+      "seeds": 4,
+      "source": "results/interpolation_arm.json"
+    },
+    "ctx=bidir  tgt=causal [interp] (this work)": {
+      "ridge_mean": 0.39418693025651114,
+      "ridge_std": 0.009192239597291133,
+      "mlp_mean": 0.38539884239435196,
+      "mlp_std": 0.006739522008885652,
+      "seeds": 4,
+      "source": "results/interpolation_arm.json"
+    },
+    "ctx=causal tgt=bidir [interp] (this work)": {
+      "ridge_mean": 0.39743251714996775,
+      "ridge_std": 0.00388412694668031,
+      "mlp_mean": 0.38298647850751877,
+      "mlp_std": 0.009216476334231363,
+      "seeds": 4,
+      "source": "results/interpolation_arm.json"
+    },
+    "ctx=causal tgt=causal [interp] (this work)": {
+      "ridge_mean": 0.3949445562281195,
+      "ridge_std": 0.004428273006996943,
+      "mlp_mean": 0.3839259594678879,
+      "mlp_std": 0.00838744040741148,
+      "seeds": 4,
+      "source": "results/interpolation_arm.json"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+# Pinned to the versions the reported numbers were measured on. The pins are
+# lower bounds in spirit and exact in practice: torch 2.6 still has no MPS
+# kernel for `linalg.svdvals` or `cummax`, and both diagnostics.py and train.py
+# route around that by moving to CPU. A newer torch that grew those kernels
+# would not break anything, but it would change which device the diagnostics ran
+# on, and reduction order differs between backends at the third decimal, which
+# is the resolution the 2x2 is read at.
+torch==2.6.0
+numpy==1.26.2
+
+# Only the test suite and the verification scripts import these; training and
+# the experiment driver do not.
+pytest>=7.0
+
+# pm-jepa's `load_corpus.py` imports `data/dataset.py`, which imports pandas.
+# We never call pandas ourselves, but the corpus cannot be loaded without it.
+pandas>=2.0

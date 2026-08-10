@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+
+# The corpus is never copied into this repo; it is read in place from
+# pm-jepa/data_cache. A stray copy here would be a second corpus that can drift
+# from the one pm-jepa's published baselines were measured on.
+data_cache/
+*.npz

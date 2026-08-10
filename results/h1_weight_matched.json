@@ -1,0 +1,96 @@
+{
+  "config": {
+    "pm_jepa_root": "/Users/nikita/pm-jepa",
+    "steps": 600,
+    "seed": 0,
+    "batch": 256,
+    "strategy": "temporal",
+    "out": "/private/tmp/claude-501/-Users-nikita/8b0cffcc-15f7-4f97-bb17-9c01e31da432/scratchpad/causal-jepa/results/h1_weight_matched.json"
+  },
+  "device": "mps",
+  "seconds": 52.834274768829346,
+  "final_pred_loss": 0.029418542981147766,
+  "eval_windows": 256,
+  "per_patch_cos_bidir_vs_causal": [
+    0.9811803102493286,
+    0.9901916980743408,
+    0.9943186640739441,
+    0.9968587756156921,
+    0.9985440969467163,
+    0.9995144605636597
+  ],
+  "per_patch_rel_l2_bidir_vs_causal": [
+    0.12706318497657776,
+    0.08956138789653778,
+    0.06570883840322495,
+    0.04810940846800804,
+    0.03146122023463249,
+    0.01633656583726406
+  ],
+  "autocorr": {
+    "temporal": {
+      "masked_patches": [
+        4,
+        5
+      ],
+      "bidir": {
+        "lag_1": 0.9576271216074626,
+        "lag_3": 0.9479539394378662,
+        "cross_boundary": 0.9483395119508108,
+        "within_side": 0.9498996218045552,
+        "boundary_excess": 0.002662567297617602,
+        "baseline_cos": 0.7062452435493469
+      },
+      "causal": {
+        "lag_1": 0.9534075260162354,
+        "lag_3": 0.9359467294481065,
+        "cross_boundary": 0.9376676579316457,
+        "within_side": 0.9364953716595967,
+        "boundary_excess": 0.010714495182037376,
+        "baseline_cos": 0.6988359093666077
+      },
+      "delta": {
+        "lag_1": -0.004219595591227199,
+        "lag_3": -0.012007209989759682,
+        "cross_boundary": -0.010671854019165039,
+        "within_side": -0.013404250144958496,
+        "boundary_excess": 0.008051927884419774,
+        "baseline_cos": -0.007409334182739258,
+        "cross_boundary_over_floor": -0.0032625198364257812,
+        "lag_3_over_floor": -0.004597875807020424
+      }
+    },
+    "interpolation": {
+      "masked_patches": [
+        2,
+        3
+      ],
+      "bidir": {
+        "lag_1": 0.9576271216074626,
+        "lag_3": 0.9479539394378662,
+        "cross_boundary": 0.9522858262062073,
+        "within_side": 0.952583524915907,
+        "boundary_excess": 0.00036905871497272535,
+        "baseline_cos": 0.7062452435493469
+      },
+      "causal": {
+        "lag_1": 0.9534075260162354,
+        "lag_3": 0.9359467294481065,
+        "cross_boundary": 0.9442783097426096,
+        "within_side": 0.9452197684182061,
+        "boundary_excess": -0.0004522932900322685,
+        "baseline_cos": 0.6988359093666077
+      },
+      "delta": {
+        "lag_1": -0.004219595591227199,
+        "lag_3": -0.012007209989759682,
+        "cross_boundary": -0.008007516463597653,
+        "within_side": -0.007363756497700935,
+        "boundary_excess": -0.0008213520050049938,
+        "baseline_cos": -0.007409334182739258,
+        "cross_boundary_over_floor": -0.0005981822808583948,
+        "lag_3_over_floor": -0.004597875807020424
+      }
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "config": {
+    "windows": 300,
+    "steps": 30,
+    "batch": 32,
+    "d_model": 64,
+    "layers": 2,
+    "device": "auto",
+    "pm_jepa_root": "/Users/nikita/pm-jepa"
+  },
+  "device": "mps",
+  "summary": {
+    "temporal|ctx=b|tgt=b": {
+      "pred_loss_first": 0.523831307888031,
+      "pred_loss_last": 0.3245144486427307,
+      "eff_rank": 21.852806091308594,
+      "copy_alignment": 0.5231945514678955,
+      "copy_loss_ratio": 4.43928861618042,
+      "lag_1": 0.9252228418986003,
+      "cross_boundary": 0.9194394946098328,
+      "interp_advantage": NaN,
+      "ridge_mean": -2.3167225018890423,
+      "mlp_mean": -2.198004961013794,
+      "seconds": 1.7
+    },
+    "temporal|ctx=b|tgt=c": {
+      "pred_loss_first": 0.5235828161239624,
+      "pred_loss_last": 0.3245947062969208,
+      "eff_rank": 21.850675582885742,
+      "copy_alignment": 0.522790253162384,
+      "copy_loss_ratio": 4.430796146392822,
+      "lag_1": 0.9250651677449544,
+      "cross_boundary": 0.9182235101858774,
+      "interp_advantage": NaN,
+      "ridge_mean": -2.3171573734127944,
+      "mlp_mean": -2.188789129257202,
+      "seconds": 1.2
+    },
+    "interpolation|ctx=b|tgt=c": {
+      "pred_loss_first": 0.5232315063476562,
+      "pred_loss_last": 0.32400837540626526,
+      "eff_rank": 20.763561248779297,
+      "copy_alignment": 0.5258476734161377,
+      "copy_loss_ratio": 4.683402061462402,
+      "lag_1": 0.9250754197438558,
+      "cross_boundary": 0.9221637547016144,
+      "interp_advantage": -0.007123492658138275,
+      "ridge_mean": -2.3200300879321443,
+      "mlp_mean": -2.609628677368164,
+      "seconds": 1.2
+    },
+    "interpolation|ctx=c|tgt=c": {
+      "pred_loss_first": 0.5220983624458313,
+      "pred_loss_last": 0.3242110013961792,
+      "eff_rank": 22.292104721069336,
+      "copy_alignment": 0.5256698131561279,
+      "copy_loss_ratio": 4.6861419677734375,
+      "lag_1": 0.9250716209411621,
+      "cross_boundary": 0.922159751256307,
+      "interp_advantage": -0.007124938070774078,
+      "ridge_mean": -2.341397534260917,
+      "mlp_mean": -2.6226394176483154,
+      "seconds": 1.2
+    }
+  },
+  "problems": []
+}
