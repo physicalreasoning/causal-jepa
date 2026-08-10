@@ -178,6 +178,30 @@ Stop the programme and write it up as a negative result if **all three** hold:
 2. E4 shows no readout recovers a trained arm above the identity control.
 3. E3 places the real corpus below the SNR threshold where the objective stops working.
 
+### Status 2026-08-10: 3 of 3 met. The criterion has fired.
+
+1. **Met, and worse than stated.** E1 shows no separation at convergence and active
+   degradation: the MLP probe ends 23 pooled SD *below* the untrained floor after 32x more
+   compute. `results/convergence.json`, finding 8.
+2. **Met.** No readout puts a trained arm above dimension-matched raw features; the best JEPA
+   readout is +0.4529 against raw +0.5091. `results/readout_ablation.json`, finding 9.
+3. **Met by a different mechanism than the one the criterion anticipated.** The SNR framing was
+   the wrong instrument. The decomposition in finding 10 shows the headline metric is mostly
+   input reconstruction, and that on the only genuinely future target all 16 arms sit in
+   [-0.0043, +0.0510], indistinguishable from zero and from raw data.
+   `results/target_decomposition.json`.
+
+Per the plan, the programme stops here and is written up as a negative result. Do not continue
+on the grounds that a bigger model or a longer run might work; E1 and E4 exist to rule exactly
+that out, and they did.
+
+**The one thing that would restart it** is not a better model, it is a better target set. Finding
+10 establishes that the current targets cannot detect learned structure: one is unpredictable by
+construction of an efficient market and one is a function of the input. A target with genuine
+hidden state, such as realised volatility over a future window or the settlement of a different
+correlated market, would be a real test and has never been run. That is a new programme with a
+new pre-registration, not a continuation of this one.
+
 That combination means the JEPA objective cannot extract structure from prediction-market ladders
 that raw features do not already carry, that the failure is a property of the data rather than of
 our implementation, and that we have measured exactly why. Written honestly, that is a better

@@ -290,6 +290,85 @@ identity control, which reads as "readout artefact, stop everything". But the un
 that same width scores +0.4423, so almost all of it was dimension. Dimension-matched raw controls
 are what turned a false positive into the correct verdict.
 
+## 10. The headline metric was mostly measuring input reconstruction
+
+Added 2026-08-10 from `results/target_decomposition.json`, E3 part C. **This explains the entire
+programme**, and it retires findings 3 and 9 as framed.
+
+Every arm across three repositories has been ranked by `ridge_mean`, the mean ridge R² over four
+probe targets. Nobody decomposed it. `pm-jepa/data/dataset.py` documents the targets itself:
+
+| target | what dataset.py says about it |
+|---|---|
+| `log_return_to_settle` | "GENUINELY FUTURE. The headline target." |
+| `time_to_expiry` | "Not in the input, provided windows are sampled at random offsets" |
+| `implied_width` | "DERIVABLE from the input, so it is a sanity check... **Low R² means broken, not interesting**" |
+| `window_log_return` | inside the window |
+
+Decomposed, across 16 arms including raw features, untrained encoders and every trained JEPA:
+
+| arm | log_return_to_settle | time_to_expiry | implied_width | window_log_return | mean |
+|---|---|---|---|---|---|
+| raw, full window | +0.0071 | +0.7935 | **+0.9320** | +0.3037 | +0.5091 |
+| raw, last 4 min | +0.0510 | +0.7437 | **+0.9407** | +0.2910 | +0.5066 |
+| jepa, concat_strikes | +0.0282 | +0.8109 | +0.7552 | +0.2172 | +0.4529 |
+| jepa, mean_all | +0.0109 | +0.7633 | +0.6518 | +0.1415 | +0.3919 |
+| untrained, mean_all | -0.0001 | +0.6781 | +0.5785 | +0.1257 | +0.3456 |
+
+**On the only genuinely future target, all 16 arms land in [-0.0043, +0.0510].** Raw features,
+an untrained encoder and every trained JEPA are indistinguishable from each other and from zero.
+Nothing in this programme ever predicted anything about the future.
+
+**Where the JEPA actually loses is `implied_width`**, best raw +0.9407 against best JEPA +0.7552,
+a gap of 0.1854. That is the target the code itself calls a derivable sanity check whose low
+values mean "broken, not interesting". A pooled 128-dimensional embedding cannot beat the raw
+2304-dimensional input at reproducing a function of that input, so the comparison was never
+winnable, and winning it would have meant nothing.
+
+So "every JEPA arm loses to raw features" decomposes into: it reconstructs a derivable quantity
+less perfectly than the thing it is a compression of, and on the target anyone would trade on,
+everything including the raw data scores zero.
+
+**This is also the sim-to-real gap.** The simulator's probe targets are genuine hidden state that
+no single market identifies: `score_diff`, `score_total`, `time_remaining` sit at +0.68 to +0.97
+and the JEPA beats identity on all three (+0.8819 against +0.7769 on `score_total`, +0.8533
+against +0.7057 on `time_remaining`). There the objective has something to learn and it learns
+it. On the real corpus there is no equivalent hidden state in the target set: one target is
+unpredictable by construction of an efficient market and one is a function of the input.
+
+**What this does not say.** That prediction-market ladders contain no learnable structure, only
+that this target set cannot detect any. A target set with genuine hidden state, for instance
+realised volatility over a future window or the settlement of a *different* correlated market,
+would be a real test. That test has not been run.
+
+## 11. Cross-sectional redundancy does not explain the gap, and my prediction was wrong
+
+Added 2026-08-10 from `results/_redundancy_kmatched.json`, E3 part B.
+
+I pre-registered the hypothesis that a Kalshi strike ladder is far more cross-sectionally
+redundant than the simulator's heterogeneous market slate, so there would be less latent
+structure for a model to add. On the native cross-sections that looked confirmed: mean sibling
+R² of 0.9850 on Kalshi against 0.9540 on the simulator, a residual of 1.5% against 4.6%.
+
+**It is a predictor-count artefact.** Kalshi has 24 markets and the simulator has 8, so
+predicting one column from 23 others is easier than from 7 for reasons having nothing to do with
+market structure. Matching K:
+
+| dataset | K | mean R² | residual |
+|---|---|---|---|
+| simulator, native | 8 | 0.9540 | 0.0460 |
+| kalshi, native | 24 | 0.9850 | 0.0150 |
+| kalshi, subsampled to 8 evenly spaced | 8 | 0.9284 | **0.0716** |
+| kalshi, contiguous middle 8 | 8 | 0.9659 | 0.0341 |
+
+At matched width Kalshi has *more* residual cross-sectional structure than the simulator when the
+strikes are spread across the ladder, and slightly less when they are adjacent. The hypothesis is
+refuted; the difference is a function of how many rungs you look at and how far apart they are.
+
+This is the second confound of exactly this shape in one day, after the readout-width confound in
+finding 9. Both were caught only by adding a matched control. On this data, any comparison
+between things of different dimension is untrustworthy until the dimension is matched.
+
 ## What this work did not establish
 
 - ~~Whether a longer run separates the trained encoder from its random initialisation.~~
