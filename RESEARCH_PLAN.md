@@ -112,6 +112,24 @@ adequate.
 - Probe R² collapses as `lam` rises: the regulariser trades representation for distribution
   shape. Report the frontier.
 
+**Result (2026-08-10). The original claim is refuted, and it changes nothing.**
+
+Run at 600 steps rather than 4,800, on E1's evidence that the probes peak at the first checkpoint
+and degrade after; a longer run would have measured a worse model. 3 seeds, 9 configurations,
+every regularised arm asserted `reg_grad_norm > 0` before it counted.
+
+Both mechanisms work once they are in the gradient. `copy_alignment` falls from 0.9655
+unregularised to 0.8060 under SIGReg and 0.7758 under VICReg, at t = -38 and t = -50. So "SIGReg
+does not prevent martingale collapse" was never true; it was never tested.
+
+And it buys nothing. Ridge moves between -0.0144 and +0.0126 across the sweep, the MLP probe is
+flat or worse. Across all 27 runs `copy_alignment` spans 0.198 while `ridge_mean` spans 0.0346,
+and their correlation is **+0.390**: within this sweep, copying more is weakly associated with
+scoring better. See finding 13.
+
+*Gate wording was wrong, again.* The criterion equated "drops below 0.90" with "the mechanism does
+help". It fired, and help is the wrong word. Recorded rather than patched, as with E1.
+
 **Cost.** 4.9 hours at 4,800 steps: 10 configurations times 3 seeds at the measured 0.123 s/step.
 Scales linearly if E1 says a longer budget is needed, so check E1's answer before launching.
 

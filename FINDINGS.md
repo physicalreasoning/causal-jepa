@@ -398,6 +398,53 @@ It also means observation SNR cannot be the sim-to-real story. Both pre-register
 for the gap, redundancy in finding 11 and noise here, are refuted. What is left is finding 10:
 the real corpus's target set contains no hidden state to recover.
 
+## 13. The regularisers do prevent copying. It buys nothing.
+
+Added 2026-08-10 from `results/regulariser_sweep.json`, E2. **This refutes a published claim in
+`pm-jepa/FINDINGS.md`**, and it is the fourth and sharpest confirmation that the copy diagnostic
+does not predict utility.
+
+Neither repo's regulariser was ever in the gradient, so "SIGReg does not prevent martingale
+collapse" described an experiment nobody ran. Computed on the online context, where it carries
+gradient, both regularisers work. 3 seeds, 600 steps, every arm asserted live before it counted.
+
+| arm | copy_alignment | Δ vs baseline | t | ridge | Δ | t | MLP | Δ | t |
+|---|---|---|---|---|---|---|---|---|---|
+| none | +0.9655 | | | +0.3917 | | | +0.3818 | | |
+| sigreg 0.01 | +0.9378 | -0.0277 | -9.3 | **+0.4042** | +0.0126 | 2.6 | +0.3850 | +0.0032 | 0.5 |
+| sigreg 0.05 | +0.8995 | -0.0660 | -23.1 | +0.3958 | +0.0041 | 0.8 | +0.3746 | -0.0072 | -0.9 |
+| sigreg 0.25 | +0.8435 | -0.1219 | -42.8 | +0.3879 | -0.0038 | -0.8 | +0.3521 | -0.0298 | -2.9 |
+| sigreg 1 | +0.8060 | **-0.1595** | -38.0 | +0.3772 | -0.0144 | -2.5 | +0.3666 | -0.0152 | -2.8 |
+| vicreg 0.05 | +0.9019 | -0.0636 | -9.5 | +0.3901 | -0.0015 | -0.3 | +0.3745 | -0.0073 | -0.5 |
+| vicreg 0.25 | +0.8236 | -0.1418 | -19.2 | +0.3922 | +0.0005 | 0.1 | +0.3303 | -0.0516 | -2.3 |
+| vicreg 1 | +0.7758 | **-0.1897** | -49.8 | +0.3811 | -0.0106 | -1.9 | +0.3439 | -0.0380 | -4.6 |
+
+**The claim is refuted.** Copy alignment falls from 0.9655 to 0.7758, an absolute drop of 0.19 at
+t = -49.8. Both mechanisms do exactly what they advertise once they are actually applied. The
+structural argument in `pm-jepa/model/sigreg.py`, that a copy of a Gaussian-ish input is itself
+Gaussian-ish so sketched normality cannot see copying, turns out to be wrong as a claim about the
+optimisation even though it is right as a claim about the statistic.
+
+**And it buys nothing.** Ridge moves between -0.0144 and +0.0126 across the whole sweep, mostly
+inside noise. The MLP probe is flat or significantly *worse*, down 0.0380 at t = -4.6 for the
+strongest VICReg. Nothing here closes any part of the gap to raw features.
+
+**The sharpest way to state it.** Across all 27 runs, `copy_alignment` spans 0.7709 to 0.9690, a
+range of 0.198, while `ridge_mean` spans only 0.0346. The correlation between them is **+0.390**,
+and with the MLP probe **+0.366**. Both positive: within this sweep, copying *more* is weakly
+associated with scoring *better*. The diagnostic is not merely uninformative about downstream
+utility, over this range it points the wrong way.
+
+So the copy oracle is now demonstrably manipulable. You can set it to almost any value you like
+with one hyperparameter, and downstream quality does not follow. That retires it as a model
+selection signal, while leaving intact what it was originally built for: detecting that copying
+is happening at all.
+
+**The gate wording was wrong again.** E2's criterion said dropping below 0.90 without destroying
+probe R² means "the mechanism does help". It fired, and "help" is the wrong word: the mechanism
+reduces copying and does not help the representation. Same class of mis-specification as E1's
+"any checkpoint". Recorded rather than patched, in `results/regulariser_sweep.json:gate`.
+
 ## What this work did not establish
 
 - ~~Whether a longer run separates the trained encoder from its random initialisation.~~
