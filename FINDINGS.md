@@ -321,9 +321,15 @@ Nothing in this programme ever predicted anything about the future.
 
 **Where the JEPA actually loses is `implied_width`**, best raw +0.9407 against best JEPA +0.7552,
 a gap of 0.1854. That is the target the code itself calls a derivable sanity check whose low
-values mean "broken, not interesting". A pooled 128-dimensional embedding cannot beat the raw
-2304-dimensional input at reproducing a function of that input, so the comparison was never
-winnable, and winning it would have meant nothing.
+values mean "broken, not interesting". A compressed embedding cannot beat the raw input at
+reproducing a function of that input, so the comparison was never winnable, and winning it would
+have meant nothing.
+
+*Attribution note, corrected 2026-08-10.* An earlier version of this paragraph said "a pooled
+128-dimensional embedding cannot beat the raw 2304-dimensional input", pairing the two numbers
+above with the wrong arms. +0.9407 is `raw_last_4min` at 384 dimensions, not the 2304-dimensional
+window, which scores +0.9320; +0.7552 is `concat_strikes` at 3072 dimensions, not the 128-dimensional
+pooled readout, which scores +0.6518. The argument is unaffected, the arm labels were wrong.
 
 So "every JEPA arm loses to raw features" decomposes into: it reconstructs a derivable quantity
 less perfectly than the thing it is a compression of, and on the target anyone would trade on,
