@@ -11,7 +11,7 @@
     "batch": 64,
     "d_model": 128,
     "layers": 4,
-    "pm_jepa_root": "/Users/nikita/pm-jepa",
+    "pm_jepa_root": "$PM_JEPA_ROOT",
     "device": "auto",
     "out": "results/sim_vs_real.json"
   },

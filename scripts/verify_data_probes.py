@@ -15,7 +15,7 @@ import sys
 import numpy as np
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-PM_JEPA = pathlib.Path("/Users/nikita/pm-jepa")
+PM_JEPA = pathlib.Path("$PM_JEPA_ROOT")
 sys.path.insert(0, str(ROOT))
 
 from causaljepa import data as cjdata          # noqa: E402

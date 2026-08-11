@@ -6,7 +6,7 @@
     "d_model": 64,
     "layers": 2,
     "device": "auto",
-    "pm_jepa_root": "/Users/nikita/pm-jepa"
+    "pm_jepa_root": "$PM_JEPA_ROOT"
   },
   "device": "mps",
   "summary": {

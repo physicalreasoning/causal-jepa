@@ -32,6 +32,7 @@ satisfies while the trajectory reverses. The first run hit exactly that case:
 reported, it is just no longer allowed to decide.
 """
 import argparse
+import os
 import json
 import pathlib
 import sys
@@ -122,7 +123,10 @@ def run_seed(X, Y, tr, te, names, *, seed, steps, checkpoints, batch, lr,
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pm-jepa-root", default="/Users/nikita/pm-jepa")
+    ap.add_argument("--pm-jepa-root",
+                    default=os.environ.get("PM_JEPA_ROOT", "../pm-jepa"),
+                    help="checkout of the pm-jepa corpus repo; "
+                         "defaults to $PM_JEPA_ROOT then ../pm-jepa")
     ap.add_argument("--seeds", type=int, default=3)
     ap.add_argument("--steps", type=int, default=19200)
     ap.add_argument("--checkpoints", default="600,1200,2400,4800,9600,19200")

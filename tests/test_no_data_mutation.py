@@ -25,6 +25,7 @@ Also asserts the corpus fingerprint. A silent change in window count would move
 every arm's R^2 without moving any code.
 """
 import importlib.util
+import os
 import pathlib
 import sys
 
@@ -32,7 +33,8 @@ import numpy as np
 import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-PM_JEPA = pathlib.Path("/Users/nikita/pm-jepa")
+PM_JEPA = pathlib.Path(
+    os.environ.get("PM_JEPA_ROOT", "../pm-jepa")).expanduser().resolve()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 

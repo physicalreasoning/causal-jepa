@@ -264,4 +264,4 @@ Run with `python -m pytest tests/ -q`. Target: under 60s on CPU.
 - Docstrings explain **why**, in the voice of `pm-jepa`: state the failure mode the
   code guards against, not what the code does.
 - Every result written to `results/*.json` with the full config inlined.
-- Never modify anything under `/Users/nikita/pm-jepa` or `/Users/nikita/slate-jepa`.
+- Never modify anything under `$PM_JEPA_ROOT` or `$SLATE_JEPA_ROOT`.

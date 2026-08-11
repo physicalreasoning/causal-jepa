@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+title: >-
+  Causal-axis JEPAs on prediction-market strike ladders: a negative
+  result and the diagnostics that failed to predict it
+message: "If you reference this work, please cite it as below."
+type: software
+authors:
+  - name: Physical Reasoning
+repository-code: "https://github.com/physicalreasoning/causal-jepa"
+license: Apache-2.0
+date-released: "2026-08-11"
+keywords:
+  - joint-embedding predictive architecture
+  - self-supervised learning
+  - representation collapse
+  - prediction markets
+  - negative results
+abstract: >-
+  A joint-embedding predictive architecture trained on prediction-market
+  strike ladders does not learn a representation that beats raw features.
+  Four pre-registered explanations were tested; three were refuted. The
+  copy-alignment diagnostic built to detect martingale collapse is sound,
+  is manipulable by a single hyperparameter, and does not predict
+  downstream utility: over a 0.198 range of copy alignment its correlation
+  with probe R-squared is +0.390, the wrong sign. Thirty-two times the
+  training compute drives the nonlinear probe 23 pooled standard
+  deviations below an untrained encoder of the same architecture while
+  effective rank nearly triples. The headline metric was found to be
+  largely measuring input reconstruction.

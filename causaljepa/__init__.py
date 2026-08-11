@@ -11,7 +11,7 @@ copy of one of these symbols. `causaljepa.data` puts pm-jepa's repo root at the
 FRONT of `sys.path`, because pm-jepa's `load_corpus.py` does `from data import
 dataset` and that absolute import has to resolve inside their tree. From that
 moment on, in the same process, a bare `import train` resolves to
-`/Users/nikita/pm-jepa/train.py` and a bare `import load_corpus` to theirs;
+`$PM_JEPA_ROOT/train.py` and a bare `import load_corpus` to theirs;
 verified, not hypothetical. Nothing raises, and the two `train` modules have
 similarly named functions with different defaults. (`probes` and `diagnostics`
 happen to be safe today only because they sit under pm-jepa's `model/` package

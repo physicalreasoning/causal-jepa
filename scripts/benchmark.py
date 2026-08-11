@@ -14,6 +14,7 @@ pm-jepa's own trained arms are read from its results/seeds.json so the table
 shows this work next to the prior work at the same probe protocol.
 """
 import argparse
+import os
 import json
 import pathlib
 import sys
@@ -78,7 +79,10 @@ def pm_jepa_reference(root):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pm-jepa-root", default="/Users/nikita/pm-jepa")
+    ap.add_argument("--pm-jepa-root",
+                    default=os.environ.get("PM_JEPA_ROOT", "../pm-jepa"),
+                    help="checkout of the pm-jepa corpus repo; "
+                         "defaults to $PM_JEPA_ROOT then ../pm-jepa")
     ap.add_argument("--seeds", type=int, default=4)
     ap.add_argument("--d-model", type=int, default=128)
     ap.add_argument("--layers", type=int, default=4)

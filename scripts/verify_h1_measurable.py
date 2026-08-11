@@ -18,7 +18,7 @@ import torch
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(pathlib.Path("/Users/nikita/pm-jepa")))
+sys.path.insert(0, str(pathlib.Path("$PM_JEPA_ROOT")))
 
 from model.encoder import LadderJEPA  # noqa: E402  pm-jepa, read-only
 

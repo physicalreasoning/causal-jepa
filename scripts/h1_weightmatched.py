@@ -29,6 +29,7 @@ weaker test of H1 by construction, and that is a fact about the mask, not the
 encoder.
 """
 import argparse
+import os
 import json
 import pathlib
 import sys
@@ -59,7 +60,10 @@ def target_both_ways(model, obs):
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pm-jepa-root", default="/Users/nikita/pm-jepa")
+    ap.add_argument("--pm-jepa-root",
+                    default=os.environ.get("PM_JEPA_ROOT", "../pm-jepa"),
+                    help="checkout of the pm-jepa corpus repo; "
+                         "defaults to $PM_JEPA_ROOT then ../pm-jepa")
     ap.add_argument("--steps", type=int, default=600)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--batch", type=int, default=256)

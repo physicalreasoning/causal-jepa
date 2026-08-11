@@ -1,6 +1,6 @@
 {
   "config": {
-    "pm_jepa_root": "/Users/nikita/pm-jepa",
+    "pm_jepa_root": "$PM_JEPA_ROOT",
     "regs": "sigreg,vicreg",
     "lams": "0.01,0.05,0.25,1.0",
     "seeds": 3,

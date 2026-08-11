@@ -1,6 +1,6 @@
 {
   "config": {
-    "pm_jepa_root": "/Users/nikita/pm-jepa",
+    "pm_jepa_root": "$PM_JEPA_ROOT",
     "seeds": 4,
     "d_model": 128,
     "layers": 4,

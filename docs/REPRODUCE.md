@@ -27,7 +27,7 @@ the same for itself, so a bare checkout runs.
 | numpy | **1.26.2** | `python3 -c "import numpy;print(numpy.__version__)"` |
 | pandas | any 2.x | needed only because pm-jepa's `data/dataset.py` imports it |
 | pytest | >= 7 | `python3 -m pytest --version` |
-| pm-jepa checkout | `/Users/nikita/pm-jepa` | must contain `load_corpus.py` and `results/baselines.json` |
+| pm-jepa checkout | `$PM_JEPA_ROOT` | must contain `load_corpus.py` and `results/baselines.json` |
 | corpus cache | `~/pm-jepa/data_cache/event_arrays/*.npz` | about 3,400 files, 45 MB |
 
 The versions are pinned exactly in `requirements.txt`, not as bureaucracy. torch
@@ -305,7 +305,7 @@ python3 scripts/benchmark.py --seeds 4
 **Runtime:** about **60 seconds** on MPS. It trains nothing. The work is 8 probe
 fits (2 causal flags x 4 seeds) on an untrained encoder, about 7s each, plus the
 corpus load; the trained arms and the controls are read from JSON. Defaults:
-`--d-model 128 --layers 4 --device auto --pm-jepa-root /Users/nikita/pm-jepa
+`--d-model 128 --layers 4 --device auto --pm-jepa-root $PM_JEPA_ROOT
 --out results/benchmark.json`, which match the training sweeps in section 5 so
 the rows are comparable.
 
@@ -410,7 +410,7 @@ import sys, numpy as np
 sys.path.insert(0, '.')
 from causaljepa.data import load_corpus, split_by_event
 from causaljepa import probes
-X, Y, owner, names = load_corpus('/Users/nikita/pm-jepa')
+X, Y, owner, names = load_corpus('$PM_JEPA_ROOT')
 tr, te = split_by_event(owner, frac=0.2, seed=0)
 print('windows', len(X), 'events', len(np.unique(owner)), 'train', tr.sum(), 'test', te.sum())
 f = X[:, -4:].mean(axis=1).reshape(len(X), -1).astype(np.float64)   # pm-jepa identity_features
@@ -511,7 +511,7 @@ Run after any sweep.
 ```
 python3 -c "
 import subprocess, sys
-p = subprocess.run(['git', 'status', '--porcelain'], cwd='/Users/nikita/pm-jepa',
+p = subprocess.run(['git', 'status', '--porcelain'], cwd='$PM_JEPA_ROOT',
                    capture_output=True, text=True)
 print('LINES:', len(p.stdout.splitlines()))
 print(p.stdout)

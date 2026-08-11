@@ -8,6 +8,7 @@ different index produces R^2 on a scale that is not those numbers' scale, and
 nothing in the pipeline would complain. This test is the tripwire.
 """
 import importlib.util
+import os
 import pathlib
 import sys
 
@@ -15,7 +16,8 @@ import numpy as np
 import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-PM_JEPA = pathlib.Path("/Users/nikita/pm-jepa")
+PM_JEPA = pathlib.Path(
+    os.environ.get("PM_JEPA_ROOT", "../pm-jepa")).expanduser().resolve()
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 

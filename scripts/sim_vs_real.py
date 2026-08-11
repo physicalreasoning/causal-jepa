@@ -37,6 +37,7 @@ pricing, the model, the training loop and the probes, is imported from slate-jep
 so the numbers stay comparable to `poc/results/poc.json`.
 """
 import argparse
+import os
 import json
 import pathlib
 import sys
@@ -47,7 +48,7 @@ import torch
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
-SLATE_POC = pathlib.Path("/Users/nikita/slate-jepa/poc")
+SLATE_POC = pathlib.Path(os.environ.get("SLATE_JEPA_ROOT", "../slate-jepa")) / "poc"
 sys.path.insert(0, str(SLATE_POC))
 
 from slatejepa import baselines, probes, sim  # noqa: E402
@@ -160,7 +161,10 @@ def main():
     ap.add_argument("--batch", type=int, default=64)
     ap.add_argument("--d-model", type=int, default=128)
     ap.add_argument("--layers", type=int, default=4)
-    ap.add_argument("--pm-jepa-root", default="/Users/nikita/pm-jepa")
+    ap.add_argument("--pm-jepa-root",
+                    default=os.environ.get("PM_JEPA_ROOT", "../pm-jepa"),
+                    help="checkout of the pm-jepa corpus repo; "
+                         "defaults to $PM_JEPA_ROOT then ../pm-jepa")
     ap.add_argument("--device", default="auto")
     ap.add_argument("--out", default="results/sim_vs_real.json")
     args = ap.parse_args()

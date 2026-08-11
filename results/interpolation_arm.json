@@ -16,7 +16,7 @@
     "split_seed": 0,
     "log_every": 100,
     "device": "auto",
-    "pm_jepa_root": "/Users/nikita/pm-jepa",
+    "pm_jepa_root": "$PM_JEPA_ROOT",
     "name": "interpolation_arm",
     "out": null
   },

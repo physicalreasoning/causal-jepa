@@ -1,6 +1,6 @@
 {
   "config": {
-    "pm_jepa_root": "/Users/nikita/pm-jepa",
+    "pm_jepa_root": "$PM_JEPA_ROOT",
     "steps": 600,
     "seed": 0,
     "batch": 256,

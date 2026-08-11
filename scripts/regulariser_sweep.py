@@ -25,6 +25,7 @@ Pre-registered gate (RESEARCH_PLAN.md E2):
          the frontier
 """
 import argparse
+import os
 import json
 import pathlib
 import sys
@@ -109,7 +110,10 @@ def run(X, Y, tr, te, names, *, reg_name, lam, seed, steps, batch, lr,
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pm-jepa-root", default="/Users/nikita/pm-jepa")
+    ap.add_argument("--pm-jepa-root",
+                    default=os.environ.get("PM_JEPA_ROOT", "../pm-jepa"),
+                    help="checkout of the pm-jepa corpus repo; "
+                         "defaults to $PM_JEPA_ROOT then ../pm-jepa")
     ap.add_argument("--regs", default="sigreg,vicreg")
     ap.add_argument("--lams", default="0.01,0.05,0.25,1.0")
     ap.add_argument("--seeds", type=int, default=3)
