@@ -664,6 +664,35 @@ can compute will reward that without a single bit of new information having been
 over an untrained encoder at matched width is necessary evidence of learning something useful. It is
 nowhere near sufficient.
 
+### Prior work, checked after the fact, which is the wrong order
+
+Before writing this up as a methods contribution we checked whether it was one. It is not, and the
+honest statement is that **both controls this programme arrived at the hard way are established
+practice**:
+
+- **Random and untrained encoder baselines** are standard in the probing literature. Hewitt and
+  Liang [[9]](#references) formalise the concern as *selectivity*, using control tasks that "can
+  only be learned by the probe itself" to separate what the representation carries from what the
+  probe can memorise. Belinkov [[10]](#references) surveys the shortcomings more broadly.
+- **Residualising a probe target against a confound predictor**, which is exactly what E7c and E8c
+  do, is an existing diagnostic: fit a confound-only predictor, define a residualised target, and
+  re-probe, where a large drop indicates confound-mediated signal.
+- **The untrained encoder being a strong baseline** is itself documented. Asano et al.
+  [[11]](#references) show the early layers of several self-supervised methods can be learned from
+  a *single image* as well as from millions, so a large part of what looks like learned structure
+  is architecture and augmentation rather than data.
+
+What this programme adds is not the method but the magnitude, and the mechanism for one family.
+A **+7.73** and a **+4.54 pooled SD** lift over a matched-width untrained encoder, on different
+targets and different corpora, both residualising to nothing, is a sharper demonstration than we
+found elsewhere. And the mechanism is specific to masked-prediction objectives rather than generic:
+the pretraining task *is* input reconstruction, so it will inflate any target with an
+input-computable component, by construction and every time. That is a narrower and more predictable
+failure than "confounds exist".
+
+The uncomfortable part is the ordering. This repository spent five experiments discovering, at
+considerable cost, controls that were already in the literature it should have read first.
+
 **A fourth criterion failed on its wording**, and this one needed two rounds. E8c's check required a
 lift above 2 pooled SD plus a trained arm above zero, and both were satisfied **by different arms**,
 one clearing zero while a second, entirely negative, supplied the lift. The condition that actually

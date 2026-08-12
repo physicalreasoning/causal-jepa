@@ -204,6 +204,9 @@ bounds what is *linearly accessible*, not what a fine-tuned model could extract.
 6. Alain & Bengio. *Linear Classifier Probes.* [arXiv:1610.01644](https://arxiv.org/abs/1610.01644), 2016.
 7. Bardes, Ponce & LeCun. *VICReg.* [arXiv:2105.04906](https://arxiv.org/abs/2105.04906), 2021.
 8. Grill et al. *BYOL.* [arXiv:2006.07733](https://arxiv.org/abs/2006.07733), 2020.
+9. Hewitt & Liang. *Designing and Interpreting Probes with Control Tasks.* [arXiv:1909.03368](https://arxiv.org/abs/1909.03368), 2019. Control tasks and probe selectivity; the prior art for the untrained-encoder control used throughout this repo.
+10. Belinkov. *Probing Classifiers: Promises, Shortcomings, and Advances.* [arXiv:2102.12452](https://arxiv.org/abs/2102.12452), 2022.
+11. Asano, Rupprecht & Vedaldi. *A critical analysis of self-supervision, or what we can learn from a single image.* [arXiv:1904.13132](https://arxiv.org/abs/1904.13132), 2019. Early layers of several SSL methods learn as well from one image as from millions, which is why an untrained encoder is a strong baseline rather than a formality.
 
 ## Citation
 
