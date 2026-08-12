@@ -826,6 +826,75 @@ and which are the features that actually predict short-horizon moves, are not in
 and cannot be backfilled. Testing those means recording depth forward from now. Given that 70% of
 minutes show no quote movement whatsoever, the prior on finding much there should be low.
 
+## 20. Staleness is not the mechanism. My inference was wrong, and the simulator says so.
+
+Added 2026-08-12 from `results/staleness_sweep.json`, E10. **This refutes finding 19's causal
+reading**, which was mine and which I stated with more confidence than the evidence supported.
+
+Finding 19 measured that ~70% of Kalshi strike-minutes carry no quote movement, and concluded the
+constraint is liquidity. The measurement stands. The *causal* step, that thinness is what killed the
+objective, was an inference from two facts sitting next to each other, and it is now tested.
+
+`observe_stale` freezes quotes in the simulator with probability `p`, compounding across buckets, so
+an unlucky cell holds one stale quote for several minutes exactly as an untouched strike does. **The
+latent is untouched**: target standard deviations are identical at every level (21.04, 37.80,
+406.16), so games unfold as before and only observation degrades. Both arms see identically frozen
+data, so what is tracked is the JEPA's *advantage*, not its absolute score.
+
+| realised staleness | identity | JEPA | advantage |
+|---|---|---|---|
+| 0.000 | +0.8229 | +0.8823 | **+0.0594** |
+| 0.201 | +0.8156 | +0.8685 | +0.0529 |
+| 0.401 | +0.8101 | +0.8630 | +0.0529 |
+| 0.550 | +0.7999 | +0.8440 | +0.0441 |
+| **0.701** | +0.7830 | +0.8235 | **+0.0405** |
+| 0.850 | +0.7303 | +0.7566 | +0.0263 |
+
+Staleness costs roughly half the advantage across the full range and **never crosses zero**. Across
+the Kalshi band the JEPA still beats raw features by **+0.0413 to +0.0358**, comparable to the
++0.0594 it enjoys on pristine data. Freezing quotes to real levels does not reproduce the real
+failure. *(The "monotone decreasing" flag reads False only because 0.2 and 0.4 tie at +0.0529; the
+trend is otherwise strictly down.)*
+
+**So the sim-to-real gap remains unexplained after six attempts.** Ruled out: observation noise
+(finding 12), cross-sectional redundancy (finding 11), the target set (finding 14), a genuine
+cross-sectional latent (finding 17), ingest poverty (finding 19), and now staleness.
+
+### The hypothesis that survives, stated as a hypothesis
+
+The simulator and this programme were never doing the same task.
+
+The simulator probes `score_diff`, `score_total` and `time_remaining` **at the window end**, which is
+*current hidden state*. Prices are a deterministic function of that state plus noise, so recovering
+it is an **inversion** problem: invert a known forward map through noise. Finding 12 is exactly what
+inversion looks like, with the advantage *growing* as noise rises, because that is when inverting
+beats reading the surface.
+
+Every Kalshi target that mattered was a **forecast**: what happens next in a near-efficient market.
+That is not inversion, and no representation can manufacture information the present does not carry.
+
+The programme's own numbers fit. Ranked by matched-width lift at `last_patch`:
+
+| lift | target | what it is |
+|---|---|---|
+| +0.1392 | `implied_width` | current state |
+| +0.1202 | `time_to_expiry` | current state |
+| +0.0433 | `vol_forecast_error` | future, **and E7c showed this lift was reconstruction** |
+| +0.0233 | `fwd_realised_vol` | future |
+| -0.0117 | `fwd_signed_return` | future |
+| -0.0318 | `log_return_to_settle` | future |
+
+The two current-state targets take three times the lift of the best future one, the only negative
+lifts are on future targets, and the one future target that looked strong was shown by its own
+control to be the encoder representing its input better. **Every real training lift in this
+programme is on current state or on input reconstruction. Not one survives on a genuinely future
+quantity.**
+
+If that is right, the JEPA objective was never the wrong tool for a badly built corpus. It was the
+right tool for a filtering problem, pointed at a forecasting problem. **This is untested.** It
+predicts that a Kalshi target which is genuinely current-but-hidden, rather than future, would show
+a surviving lift, and no such target has been built.
+
 ## What this work did not establish
 
 - ~~Whether a longer run separates the trained encoder from its random initialisation.~~

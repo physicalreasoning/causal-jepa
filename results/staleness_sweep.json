@@ -1,0 +1,95 @@
+{
+  "config": {
+    "stale": "0,0.2,0.4,0.55,0.7,0.85",
+    "seeds": 2,
+    "arm": "slate",
+    "games_train": 1200,
+    "games_test": 300,
+    "per_game": 6,
+    "window": 48,
+    "steps": 1500,
+    "batch": 64,
+    "d_model": 128,
+    "layers": 4,
+    "device": "auto",
+    "out": "results/staleness_sweep.json"
+  },
+  "device": "mps",
+  "kalshi_band": [
+    0.666,
+    0.75
+  ],
+  "sweep": [
+    {
+      "p": 0.0,
+      "realised_unchanged": 0.0,
+      "identity_ridge": 0.8228814704000218,
+      "jepa_ridge_mean": 0.8823130873811398,
+      "jepa_ridge_std": 0.018720522330871237,
+      "advantage": 0.059431616981117985,
+      "seeds": 2,
+      "seconds": 613.0
+    },
+    {
+      "p": 0.2,
+      "realised_unchanged": 0.200556640625,
+      "identity_ridge": 0.8156270260360446,
+      "jepa_ridge_mean": 0.8684969509493434,
+      "jepa_ridge_std": 0.0032153644070928022,
+      "advantage": 0.05286992491329878,
+      "seeds": 2,
+      "seconds": 664.6
+    },
+    {
+      "p": 0.4,
+      "realised_unchanged": 0.4007834201388889,
+      "identity_ridge": 0.8100925240318887,
+      "jepa_ridge_mean": 0.8630075808652065,
+      "jepa_ridge_std": 0.004093496607160296,
+      "advantage": 0.052915056833317764,
+      "seeds": 2,
+      "seconds": 680.4
+    },
+    {
+      "p": 0.55,
+      "realised_unchanged": 0.5504904513888889,
+      "identity_ridge": 0.7998615338231051,
+      "jepa_ridge_mean": 0.844006499217901,
+      "jepa_ridge_std": 0.0038036723464118793,
+      "advantage": 0.044144965394795954,
+      "seeds": 2,
+      "seconds": 687.1
+    },
+    {
+      "p": 0.7,
+      "realised_unchanged": 0.7005512152777778,
+      "identity_ridge": 0.7829975773563831,
+      "jepa_ridge_mean": 0.8234500897343623,
+      "jepa_ridge_std": 0.0038927874193868117,
+      "advantage": 0.0404525123779792,
+      "seeds": 2,
+      "seconds": 693.2
+    },
+    {
+      "p": 0.85,
+      "realised_unchanged": 0.8502680121527778,
+      "identity_ridge": 0.7303324191919124,
+      "jepa_ridge_mean": 0.7566161516313177,
+      "jepa_ridge_std": 0.007468159817751174,
+      "advantage": 0.026283732439405294,
+      "seeds": 2,
+      "seconds": 695.7
+    }
+  ],
+  "analysis": {
+    "advantage_at_zero_staleness": 0.059431616981117985,
+    "crossing_realised_staleness": null,
+    "advantage_across_kalshi_band": [
+      0.041302692903393425,
+      0.03577281735655789
+    ],
+    "monotone_decreasing": false,
+    "dead_by_kalshi_band": false,
+    "verdict": "STALENESS IS NOT SUFFICIENT: the advantage is still +0.0413 to +0.0358 across the Kalshi band, so freezing quotes to real levels does not reproduce the real failure. Finding 19's reading is wrong and the sim-to-real gap is something else."
+  }
+}

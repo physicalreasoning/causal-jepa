@@ -14,7 +14,7 @@
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-Apache%202.0-blue.svg"></a>
   <img alt="python" src="https://img.shields.io/badge/python-3.11%2B-blue.svg">
   <img alt="pytorch" src="https://img.shields.io/badge/pytorch-2.6-ee4c2c.svg">
-  <a href="FINDINGS.md"><img alt="findings" src="https://img.shields.io/badge/findings-19-success.svg"></a>
+  <a href="FINDINGS.md"><img alt="findings" src="https://img.shields.io/badge/findings-20-success.svg"></a>
   <a href="docs/RESEARCH_PLAN.md"><img alt="pre-registered" src="https://img.shields.io/badge/gates-pre--registered-informational.svg"></a>
 </p>
 
@@ -42,6 +42,8 @@ would have succeeded.
 | So why did it fail here? | The metric was mostly input reconstruction. Nearly the whole gap sat in a target the corpus code documents as derivable |
 | Would targets with real hidden state change it? | **No.** They produce a +7.7 sigma training lift that vanishes once you remove what raw features already explain |
 | Could you have known in advance? | **Yes.** Three of the four original targets classify as unusable in about a minute, with no training and no model |
+| Is the market's thinness the cause? | **No.** Freezing simulator quotes to Kalshi's 70% leaves the advantage at +0.0405, barely down from +0.0594 |
+| Then what is? | Unresolved after six attempts. The surviving hypothesis: the simulator inverts current hidden state, this corpus asked for forecasts |
 | Is there anything real in this data? | Realised correlation is predictable at +0.3693, but one lagged number gets +0.2718 and the ladder adds nothing measurable |
 | Does a cross-sectional latent save the JEPA? | **No.** Its largest lift yet, +4.54 sigma, dissolves under the same control |
 
