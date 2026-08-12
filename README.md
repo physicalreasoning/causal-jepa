@@ -175,9 +175,11 @@ causaljepa/          library
   diagnostics.py     copy oracle, directional split, target autocorrelation, effective rank
   regularisers.py    SIGReg and VICReg, applied to the ONLINE context
   probes.py          ridge and MLP probes, ported verbatim for comparability
-  data.py            corpus loader (reads the predecessor corpus in place)
+  data.py            corpus loader: local build, $PM_JEPA_ROOT, or explicit path
+  corpus/            vendored Kalshi corpus builder (public API, no credentials)
   train.py           training loop; records reg_grad_norm every step
 scripts/             one experiment per file, each writing results/<name>.json
+  build_corpus.py    rebuilds the corpus from Kalshi's public API
 tests/               49 tests, including cache exactness and a no-mutation guard
 results/             every raw result, with the full config inlined
 docs/EVALS.md        evaluation protocol and what each measurement cannot tell you
@@ -203,26 +205,36 @@ paths work but timings in `docs/REPRODUCE.md` are MPS.
 
 ## Data availability
 
-**The corpus is not in this repository and is not currently public.** It is built from Kalshi's
-free unauthenticated API by the predecessor repository, which is private, and consists of 25,818
-windows of reconstructed 24-strike ladders over settled hourly crypto events.
-
-Point the code at a checkout with:
+The corpus is 25,818 windows of reconstructed 24-strike ladders over settled Kalshi hourly crypto
+events. It is **not committed** (43 MB of market data does not belong in a git history), but it is
+**fully rebuildable**, because everything it comes from is public:
 
 ```bash
-export PM_JEPA_ROOT=/path/to/pm-jepa       # must contain load_corpus.py and results/baselines.json
-export SLATE_JEPA_ROOT=/path/to/slate-jepa # only needed for the simulator experiment
+python3 scripts/build_corpus.py --series KXBTCD --max-events 2000
 ```
 
-Without it, the 36 tests that do not touch the corpus still run and the other 13 skip:
+That reconstructs the whole corpus into `data_cache/` from
+`api.elections.kalshi.com`, Kalshi's **unauthenticated** host. No API key, no account, no
+credential at any point. The builder and the four modules it depends on are vendored in
+`causaljepa/corpus/`, copied unmodified from the predecessor repository so the two cannot
+silently disagree about window starts, target offsets or event filtering.
+
+**One caveat, and it is important.** Kalshi events settle and roll, so a corpus rebuilt today
+covers different events than the snapshot in `results/`. A rebuild reproduces the *method* and
+should reproduce the qualitative findings; it will not reproduce the fourth decimal place. To
+reproduce the published numbers exactly you need the original snapshot:
+
+```bash
+export PM_JEPA_ROOT=/path/to/pm-jepa   # the snapshot results/ was measured on
+```
+
+`load_corpus()` takes either route: an explicit path, then `$PM_JEPA_ROOT`, then a locally built
+`data_cache/`. With no corpus at all the 36 tests that do not need one still run and the other 13
+skip:
 
 ```bash
 python3 -m pytest tests/ -q
 ```
-
-Everything in `results/` was produced from that corpus and is complete, so the findings are
-checkable without it even though the runs are not repeatable without it. This is a real
-limitation and we state it plainly rather than implying reproducibility we cannot offer.
 
 ## Reproduction
 
@@ -255,6 +267,9 @@ number differs.
   produced the wrong conclusion if followed literally.
 - **The absolute paths in `results/*.json` were normalised** to `$PM_JEPA_ROOT` before
   publication. No other field was altered.
+- **A rebuilt corpus is not the published corpus.** Kalshi events roll, so re-running
+  `build_corpus.py` today samples different events. The findings should survive; the exact
+  numbers will not.
 
 ## What would restart this
 

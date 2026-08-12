@@ -1,20 +1,32 @@
-"""Corpus access for causal-jepa, borrowed wholesale from pm-jepa.
+"""Corpus access.
 
-This project forks pm-jepa's model, not its data. Every number we report has to
-sit next to pm-jepa's prior results, and that comparison is only honest if both
-projects see the identical windows in the identical order with the identical
-train/test split. So this module does not build windows; it imports pm-jepa's
-`load_corpus` module off disk and calls it. Reimplementing `windows_from_event`
-here would be a second chance to disagree about window starts, target offsets or
-event filtering, and any such disagreement would silently invalidate the
-comparison instead of raising.
+The corpus is 25,818 windows of reconstructed 24-strike Kalshi ladders over
+settled hourly crypto events. It is not committed: `.gitignore` excludes
+`data_cache/`, because 43 MB of snapshotted market data does not belong in a
+git history and would go stale the moment anyone rebuilt it.
 
-The corpus also stays where it is. `data_cache/event_arrays/*.npz` is 45 MB of
-snapshotted Kalshi ladders that cannot be rebuilt offline; copying it into this
-repo would create a second copy that can drift from the one pm-jepa trains on.
-Everything below is read-only with respect to the pm-jepa tree: we import a
-module and call `build()`, which only reads. We never call pm-jepa's `main()`,
-which writes `results/corpus_shape.json`.
+Two ways to get it, and `load_corpus` accepts either:
+
+  1. Build it. `python3 scripts/build_corpus.py` reconstructs the whole thing
+     from Kalshi's UNAUTHENTICATED public API into `data_cache/` at the repo
+     root. No key, no account, no credential. This is the path for anyone
+     outside the lab.
+  2. Point at an existing pm-jepa checkout via `$PM_JEPA_ROOT`. This is the
+     path that reproduces the published numbers EXACTLY, because it reads the
+     same snapshot they were measured on.
+
+The distinction matters. Kalshi events settle and roll, so a corpus rebuilt
+today covers different events than the one in `results/`. A rebuild reproduces
+the METHOD and should reproduce the qualitative findings; it will not reproduce
+the fourth decimal place. Anything comparing against a number in `results/`
+should use route 2.
+
+Window construction is not reimplemented here. It comes from the vendored
+`causaljepa.corpus.dataset`, which is pm-jepa's own module copied unmodified,
+so the two projects cannot silently disagree about window starts, target
+offsets or event filtering. When route 2 is used, pm-jepa's `load_corpus` is
+imported off disk and called instead, which is read-only with respect to that
+tree: `build()` only reads, and `main()`, which writes, is never called.
 """
 import importlib.util
 import pathlib
@@ -87,7 +99,50 @@ def _pm_jepa_module(pm_jepa_root, name: str):
     return module
 
 
-def load_corpus(pm_jepa_root, window: int = 24, stride: int = 4
+def _repo_root() -> pathlib.Path:
+    return pathlib.Path(__file__).resolve().parents[1]
+
+
+def _is_local_cache(root: str) -> bool:
+    """True when `root` is this repository rather than a pm-jepa checkout."""
+    return pathlib.Path(root).resolve() == _repo_root()
+
+
+def _resolve_root(root=None) -> str:
+    """Pick a corpus root: explicit argument, then $PM_JEPA_ROOT, then local.
+
+    Raises rather than returning a path that has no corpus in it, because the
+    failure otherwise surfaces much later as an empty array and reads like a
+    modelling bug.
+    """
+    import os
+    if root is None:
+        root = os.environ.get("PM_JEPA_ROOT") or str(_repo_root())
+    p = pathlib.Path(root).expanduser().resolve()
+    if not (p / "data_cache" / "event_arrays").is_dir():
+        raise FileNotFoundError(
+            "no corpus at {}. Either build one with "
+            "`python3 scripts/build_corpus.py`, or set $PM_JEPA_ROOT to a "
+            "pm-jepa checkout that contains data_cache/event_arrays/. "
+            "See the Data availability section of README.md.".format(p))
+    return str(p)
+
+
+def _local_loader():
+    """Import the vendored `scripts/load_corpus.py` once, by path."""
+    key = "__local__"
+    if key in _MODULE_CACHE:
+        return _MODULE_CACHE[key]
+    path = _repo_root() / "scripts" / "load_corpus.py"
+    spec = importlib.util.spec_from_file_location("causaljepa_local_load_corpus", path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    _MODULE_CACHE[key] = module
+    return module
+
+
+def load_corpus(root=None, window: int = 24, stride: int = 4
                 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[str]]:
     """-> (X, Y, owner, target_names), straight out of pm-jepa's own builder.
 
@@ -100,12 +155,16 @@ def load_corpus(pm_jepa_root, window: int = 24, stride: int = 4
     hard-coded, so a reordering of the target columns upstream cannot silently
     mislabel our probe R^2 tables.
     """
-    root = str(pathlib.Path(pm_jepa_root).expanduser().resolve())
+    root = _resolve_root(root)
     key = (root, int(window), int(stride))
     if key in _CORPUS_CACHE:
         return _CORPUS_CACHE[key]
 
-    lc = _pm_jepa_module(root, "load_corpus")
+    if _is_local_cache(root):
+        # Locally built corpus: use the vendored loader.
+        lc = _local_loader()
+    else:
+        lc = _pm_jepa_module(root, "load_corpus")
     # `build` returns (X, Y, owner, n_short); n_short is the count of events too
     # short to yield a single window, useful for the log but not for training.
     X, Y, owner, _n_short = lc.build(window=window, stride=stride)
