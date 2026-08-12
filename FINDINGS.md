@@ -701,6 +701,62 @@ Recorded as run in `results/residual_probe_cross.json:verdict`, corrected under 
 Four wording failures across sixteen gates is itself worth reporting: a threshold fixed in advance
 is still only as good as the failure modes its author imagined.
 
+## 18. The corpus discards most of what the API returns, and the sim-versus-real comparison never controlled for it
+
+Added 2026-08-12. Structural facts about the data pipeline, verified against a live API response and
+against the corpus itself. **This qualifies finding 12 and E3, and it is the most consequential
+limitation in this document.**
+
+Per strike per minute, Kalshi's candlestick endpoint returns **ten fields**:
+
+```
+yes_bid:  open, high, low, close        yes_ask:  open, high, low, close
+volume,  open_interest
+```
+
+`data/kalshi.py::candle_quote` reads **two of them**, both `close_dollars`. The intra-minute high
+and low of each side, which is the realised range and the cheapest good volatility estimator
+available below the minute grid, is dropped at ingest. E7's headline targets were **volatility**
+targets. We asked the model to predict volatility having thrown the range away.
+
+A live event pulled 2026-08-12 (`KXBTCD-26AUG1213`) carries **188 strikes**. `resample_ladder`
+interpolates onto a fixed 24-point grid, so for such events most of the cross-section is discarded
+and `np.interp` smooths what remains. The claim made repeatedly in this repo, that a Kalshi ladder
+is "a smooth near-deterministic function of two numbers", is therefore partly a statement about our
+interpolation rather than about the market.
+
+**And the confound that matters most.** The simulator every arm was benchmarked against has **25
+features per market**: logit mid, half-spread, five bid sizes, five ask sizes, five bid offsets,
+five ask offsets, imbalance, trade count, signed volume. The Kalshi corpus has **4 derived
+channels**. Finding 12 concluded the objective works on the simulator and fails on the market, and
+attributed the difference to the market. That comparison was never controlled for feature richness,
+and it cannot support the weight this programme put on it.
+
+**The current corpus is also richer than this repo claimed.** Persistence of principal components
+across ten minutes, measured on the committed corpus:
+
+| channel | PC1 | PC2 | PC3 | PC4 | PC5 | PC6 |
+|---|---|---|---|---|---|---|
+| `survival_prob` | +0.919 | +0.734 | +0.494 | +0.223 | +0.269 | +0.402 |
+| `quoted_spread` | +0.537 | +0.119 | +0.251 | +0.067 | +0.286 | +0.160 |
+| `log_volume` | +0.642 | +0.813 | +0.184 | +0.369 | +0.089 | +0.221 |
+| `log_open_interest` | **+0.946** | +0.596 | **+0.820** | **+0.822** | +0.562 | **+0.680** |
+
+Open interest carries at least six persistent components. Only `survival_prob` looks like the
+two-degrees-of-freedom object this repo described, and every probe target ever built here was
+price-derived, so nothing asked the model about the rest.
+
+**What this does and does not overturn.** It does not rescue any specific result: findings 14 and 17
+compare arms on identical inputs, so a poorer input set penalises the raw controls and the encoder
+equally. What it does is bound the scope. The honest statement is **not** "prediction-market ladders
+carry too little structure for a representation learner". It is "the four channels this corpus
+keeps, on a 24-point interpolated grid, carry too little structure", and the gap between those two
+sentences is large and was never measured.
+
+Order-book depth and signed flow, which the simulator has and this corpus lacks entirely, are
+probably not recoverable retroactively: candles are what the API serves historically. Testing that
+half would require recording depth forward from now.
+
 ## What this work did not establish
 
 - ~~Whether a longer run separates the trained encoder from its random initialisation.~~

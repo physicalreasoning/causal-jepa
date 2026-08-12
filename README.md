@@ -14,7 +14,7 @@
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-Apache%202.0-blue.svg"></a>
   <img alt="python" src="https://img.shields.io/badge/python-3.11%2B-blue.svg">
   <img alt="pytorch" src="https://img.shields.io/badge/pytorch-2.6-ee4c2c.svg">
-  <a href="FINDINGS.md"><img alt="findings" src="https://img.shields.io/badge/findings-17-success.svg"></a>
+  <a href="FINDINGS.md"><img alt="findings" src="https://img.shields.io/badge/findings-18-success.svg"></a>
   <a href="docs/RESEARCH_PLAN.md"><img alt="pre-registered" src="https://img.shields.io/badge/gates-pre--registered-informational.svg"></a>
 </p>
 
@@ -182,6 +182,14 @@ docs/
 ```
 
 ## Limitations
+
+**The corpus keeps a fraction of what the API returns**, and this bounds every conclusion here.
+Kalshi's candlesticks carry ten fields per strike per minute; the builder reads two, dropping the
+intra-minute bid and ask ranges. Events with up to 188 strikes are interpolated onto a 24-point
+grid. The simulator all of this was benchmarked against has 25 features per market against this
+corpus's 4, and the sim-versus-real comparison in finding 12 never controlled for that. The honest
+scope is "the four channels this corpus keeps carry too little structure", not "prediction-market
+ladders do". See finding 18.
 
 One corpus, one asset class, one venue. 1.8M parameters. Realised volatility over a future window
 was the obvious escape hatch and it has now been tried, at two horizons, with the derivable part
