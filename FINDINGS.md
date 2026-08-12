@@ -772,6 +772,60 @@ retained, roughly 10,000 API calls, and it has not been run. **Until it is, the 
 above stand and the empirical claim that richer features would help is unsupported in either
 direction.**
 
+## 19. The discarded fields were recovered. They are empty, because the market is thin.
+
+Added 2026-08-12 from `results/rich_vs_lean.json`, E9. **This closes the question finding 18
+opened**, and it replaces this repository's original hand-wave about dimensionality with a measured
+reason.
+
+Finding 18 established that the builder reads 2 of the 10 fields each candle carries. So we rebuilt
+534 events keeping all of them, through slate's own ladder builder, validator, `implied_spot`,
+`implied_width` and `resample_ladder`, so that the lean arm is **bit-identical to the committed
+corpus** on overlapping events: 6 of 6 checked matched exactly on `obs`, `ts` and `state`. Identical
+minutes, identical windows, identical targets; only the channel count differs.
+
+Width is controlled. Rich has 10 channels against lean's 4, so `lean_tiled` repeats the lean
+channels to the same 10, carrying identical information at identical dimension.
+
+| target | lean | lean_tiled | rich | rich − tiled |
+|---|---|---|---|---|
+| `fwd_realised_vol` | +0.1840 | +0.2061 | +0.1816 | **-0.0245** |
+| `vol_forecast_error` | +0.2407 | +0.2361 | +0.1893 | **-0.0468** |
+| `fwd_abs_return` | +0.1275 | +0.1218 | +0.1012 | -0.0206 |
+| `fwd_signed_return` | -0.0320 | -0.0430 | -0.0791 | -0.0361 |
+
+**The extra fields do not help on any target.** Repeating the four channels the corpus already keeps
+beats adding six genuinely new ones, at matched dimension.
+
+**And here is why**, which is the part worth keeping:
+
+| channel | fraction exactly zero |
+|---|---|
+| `bid_range` | 0.699 |
+| `ask_range` | 0.699 |
+| `mid_range` | 0.666 |
+| `mid_drift` | 0.724 |
+| `bid_open_to_close` | 0.747 |
+| `ask_open_to_close` | 0.750 |
+| `log_volume` | 0.644 |
+
+On roughly **70% of strike-minutes the quote does not move at all**, and on **64% nothing trades**.
+The intra-minute range that should have been the cheapest good volatility estimator is mostly
+literally zero. The fields exist in the API and carry almost no information on this venue, because
+most strikes on an hourly crypto ladder are untouched from one minute to the next.
+
+**So the constraint is liquidity, not the builder.** That is a better-supported statement than the
+one this repo made for most of its life. "A Kalshi ladder is a smooth function of two numbers" was
+partly an artefact of our own interpolation, as finding 18 showed. The defensible version is: *these
+ladders are thin, most of the cross-section is stale at any given minute, and no amount of keeping
+more fields changes that.* Finding 18's structural criticisms stand; its implied hope that richer
+ingest would rescue the result does not.
+
+**What this still does not test.** Order-book depth and signed order flow, which the simulator has
+and which are the features that actually predict short-horizon moves, are not in the candles at all
+and cannot be backfilled. Testing those means recording depth forward from now. Given that 70% of
+minutes show no quote movement whatsoever, the prior on finding much there should be low.
+
 ## What this work did not establish
 
 - ~~Whether a longer run separates the trained encoder from its random initialisation.~~

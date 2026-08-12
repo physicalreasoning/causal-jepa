@@ -1,0 +1,170 @@
+{
+  "config": {
+    "horizon": 10,
+    "window": 24,
+    "stride": 4,
+    "out": "results/rich_vs_lean.json"
+  },
+  "n_train": 2553,
+  "n_test": 778,
+  "events": 463,
+  "target_names": [
+    "fwd_realised_vol",
+    "vol_forecast_error",
+    "fwd_abs_return",
+    "fwd_signed_return"
+  ],
+  "lean_reference": 0.1487,
+  "arms": {
+    "lean|last_min": {
+      "features": "lean",
+      "readout": "last_min",
+      "dim": 96,
+      "ridge": {
+        "fwd_realised_vol": 0.1840316248561522,
+        "vol_forecast_error": 0.18292054274095793,
+        "fwd_abs_return": 0.1274833326033734,
+        "fwd_signed_return": -0.03201171816285431
+      },
+      "mlp": {
+        "fwd_realised_vol": 0.2186620831489563,
+        "vol_forecast_error": -0.06879842281341553,
+        "fwd_abs_return": -0.47386813163757324,
+        "fwd_signed_return": -0.6975072622299194
+      },
+      "seconds": 1.4
+    },
+    "lean|last_4min": {
+      "features": "lean",
+      "readout": "last_4min",
+      "dim": 384,
+      "ridge": {
+        "fwd_realised_vol": 0.10462633191741633,
+        "vol_forecast_error": 0.2406796928147643,
+        "fwd_abs_return": 0.10563506365812891,
+        "fwd_signed_return": -0.09838493163176265
+      },
+      "mlp": {
+        "fwd_realised_vol": 0.2813528776168823,
+        "vol_forecast_error": -0.03581535816192627,
+        "fwd_abs_return": -0.276755690574646,
+        "fwd_signed_return": -0.591277003288269
+      },
+      "seconds": 1.5
+    },
+    "lean_tiled|last_min": {
+      "features": "lean_tiled",
+      "readout": "last_min",
+      "dim": 240,
+      "ridge": {
+        "fwd_realised_vol": 0.20609896825687501,
+        "vol_forecast_error": 0.19383161762530254,
+        "fwd_abs_return": 0.12178550891658124,
+        "fwd_signed_return": -0.04302288363281059
+      },
+      "mlp": {
+        "fwd_realised_vol": 0.15081673860549927,
+        "vol_forecast_error": -0.26369035243988037,
+        "fwd_abs_return": -0.6906297206878662,
+        "fwd_signed_return": -0.6903647184371948
+      },
+      "seconds": 1.3
+    },
+    "lean_tiled|last_4min": {
+      "features": "lean_tiled",
+      "readout": "last_4min",
+      "dim": 960,
+      "ridge": {
+        "fwd_realised_vol": 0.057150878590041976,
+        "vol_forecast_error": 0.23608807949311694,
+        "fwd_abs_return": 0.07249509935222853,
+        "fwd_signed_return": -0.13441198673293542
+      },
+      "mlp": {
+        "fwd_realised_vol": 0.2526324987411499,
+        "vol_forecast_error": 0.02846294641494751,
+        "fwd_abs_return": -0.29916810989379883,
+        "fwd_signed_return": -0.545580267906189
+      },
+      "seconds": 1.8
+    },
+    "rich|last_min": {
+      "features": "rich",
+      "readout": "last_min",
+      "dim": 240,
+      "ridge": {
+        "fwd_realised_vol": 0.18156681931556584,
+        "vol_forecast_error": 0.18833183246851826,
+        "fwd_abs_return": 0.10116127100889905,
+        "fwd_signed_return": -0.07911996385008813
+      },
+      "mlp": {
+        "fwd_realised_vol": 0.2817091941833496,
+        "vol_forecast_error": -0.10381186008453369,
+        "fwd_abs_return": -0.3778771162033081,
+        "fwd_signed_return": -0.7170485258102417
+      },
+      "seconds": 1.2
+    },
+    "rich|last_4min": {
+      "features": "rich",
+      "readout": "last_4min",
+      "dim": 960,
+      "ridge": {
+        "fwd_realised_vol": -0.055570370753331266,
+        "vol_forecast_error": 0.18925585398693712,
+        "fwd_abs_return": -0.1683556271794846,
+        "fwd_signed_return": -0.2595316675200694
+      },
+      "mlp": {
+        "fwd_realised_vol": 0.22945278882980347,
+        "vol_forecast_error": -0.10209894180297852,
+        "fwd_abs_return": -0.18362641334533691,
+        "fwd_signed_return": -0.5174649953842163
+      },
+      "seconds": 1.8
+    }
+  },
+  "lean_check": {
+    "best_lean_vfe": 0.2406796928147643,
+    "reference": 0.1487,
+    "tolerance": 0.12,
+    "ok": true
+  },
+  "deltas": {
+    "fwd_realised_vol": {
+      "lean": 0.1840316248561522,
+      "lean_tiled": 0.20609896825687501,
+      "rich": 0.18156681931556584,
+      "rich_minus_lean": -0.002464805540586368,
+      "rich_minus_tiled": -0.024532148941309173
+    },
+    "vol_forecast_error": {
+      "lean": 0.2406796928147643,
+      "lean_tiled": 0.23608807949311694,
+      "rich": 0.18925585398693712,
+      "rich_minus_lean": -0.051423838827827195,
+      "rich_minus_tiled": -0.046832225506179825
+    },
+    "fwd_abs_return": {
+      "lean": 0.1274833326033734,
+      "lean_tiled": 0.12178550891658124,
+      "rich": 0.10116127100889905,
+      "rich_minus_lean": -0.026322061594474366,
+      "rich_minus_tiled": -0.020624237907682197
+    },
+    "fwd_signed_return": {
+      "lean": -0.03201171816285431,
+      "lean_tiled": -0.04302288363281059,
+      "rich": -0.07911996385008813,
+      "rich_minus_lean": -0.04710824568723382,
+      "rich_minus_tiled": -0.03609708021727753
+    }
+  },
+  "verdict": {
+    "headline_target": "vol_forecast_error",
+    "width_matched_gain": -0.046832225506179825,
+    "helps": false,
+    "statement": "THE DISCARDED FIELDS DO NOT HELP: -0.0468 on vol_forecast_error against a width-matched control. The corpus was thin but the thinness was not what held the result back."
+  }
+}
