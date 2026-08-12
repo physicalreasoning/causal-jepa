@@ -17,7 +17,7 @@ DESIGN NOTE, read before comparing anything.
   The comparison that matters is the FINAL checkpoint against the untrained
   floor at the same seed, and that one is exact.
 
-Pre-registered gate (RESEARCH_PLAN.md E1), wording corrected after the first run:
+Pre-registered gate (docs/RESEARCH_PLAN.md E1), wording corrected after the first run:
   MLP R^2 at the FINAL checkpoint exceeds the untrained floor by > 2 pooled SD,
   AND the trajectory is non-decreasing over the last two checkpoints
       -> the objective does learn; the 600-step null was a budget artefact

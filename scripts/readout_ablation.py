@@ -14,7 +14,7 @@ probed under every readout too: a readout that lifts the trained model must
 also be checked against what it does to random features, or we are just
 measuring the dimension of the readout.
 
-Pre-registered gate (RESEARCH_PLAN.md E4):
+Pre-registered gate (docs/RESEARCH_PLAN.md E4):
   any readout puts a trained arm above identity (+0.4491 ridge)
       -> the prior conclusion was a readout artefact, stop and correct
   best readout still below identity

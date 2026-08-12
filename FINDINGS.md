@@ -226,7 +226,7 @@ will show up as a zero in the logs rather than as a silent no-op.
 
 ## 8. More training makes it worse, and effective rank moves opposite to utility
 
-Added 2026-08-10 from `results/convergence.json`, E1 in `RESEARCH_PLAN.md`. 3 seeds, 19,200
+Added 2026-08-10 from `results/convergence.json`, E1 in `docs/RESEARCH_PLAN.md`. 3 seeds, 19,200
 steps, one long cosine schedule probed at six checkpoints. This retires finding 2's main caveat.
 
 | step | ridge | MLP | MLP vs untrained floor | copy_align | eff_rank |
@@ -257,7 +257,7 @@ downstream utility.
 criterion read "exceeds the floor by > 2 pooled SD at any checkpoint", which the transient +3.30
 at step 600 satisfies. "Any checkpoint" cannot answer whether more training helps. The recorded
 `gate` in the JSON is left exactly as the run produced it; the correction lives beside it in
-`gate_review`, and `RESEARCH_PLAN.md` now shows the old wording struck rather than replaced. A
+`gate_review`, and `docs/RESEARCH_PLAN.md` now shows the old wording struck rather than replaced. A
 plan that silently edits its criteria after seeing data is worth nothing.
 
 ## 9. The readout was hiding half the result, and the bar was too low

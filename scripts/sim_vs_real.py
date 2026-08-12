@@ -30,7 +30,7 @@ is the honest common axis. Prediction registered before running: real Kalshi
 should sit far higher than the simulator.
 
 NOTE ON PROVENANCE. `observe_scaled` below is a fork of `sim.observe` with one
-added parameter. slate-jepa is read-only for this repo (RESEARCH_PLAN.md rule 7),
+added parameter. slate-jepa is read-only for this repo (docs/RESEARCH_PLAN.md rule 7),
 and the noise level is an inline literal there with no way to reach it, so the
 function is copied rather than imported. Everything else, the latent process, the
 pricing, the model, the training loop and the probes, is imported from slate-jepa

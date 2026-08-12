@@ -15,7 +15,7 @@ HARD PRECONDITION. Every arm with a regulariser must report
 the result is discarded rather than reported. That check is an assertion here,
 not a log line.
 
-Pre-registered gate (RESEARCH_PLAN.md E2):
+Pre-registered gate (docs/RESEARCH_PLAN.md E2):
   copy_alignment drops below 0.90 without destroying probe R^2
       -> the original claim was wrong, the mechanism does help
   copy_alignment stays above 0.95 across the sweep
