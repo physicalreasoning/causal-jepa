@@ -757,6 +757,21 @@ Order-book depth and signed flow, which the simulator has and this corpus lacks 
 probably not recoverable retroactively: candles are what the API serves historically. Testing that
 half would require recording depth forward from now.
 
+**The empirical half of this is still open.** A first attempt to test it, rebuilding 109 events with
+eight channels on a 48-point grid and comparing against the four-channel 24-point build on the same
+events, is **discarded as invalid**. It carried a built-in control, a `lean` arm that had to
+reproduce the corpus's own `raw_last_min` number of +0.1487 on `vol_forecast_error`, and that arm
+returned -0.5459. Two causes, both in the test rather than in the data: 911 windows against the
+corpus's 17,449, so 678 training rows against up to 1,536 features drove every arm negative; and the
+`lean` arm recomputed spot and width with a crude quantile instead of calling `slate.implied_spot`
+and `slate.implied_width`, rejecting 566 minutes the real builder keeps. It was never the same
+feature set, so it never tested the question.
+
+Doing this properly means a full corpus rebuild through the existing builder with the extra fields
+retained, roughly 10,000 API calls, and it has not been run. **Until it is, the structural facts
+above stand and the empirical claim that richer features would help is unsupported in either
+direction.**
+
 ## What this work did not establish
 
 - ~~Whether a longer run separates the trained encoder from its random initialisation.~~
