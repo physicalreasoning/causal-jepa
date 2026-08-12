@@ -451,13 +451,120 @@ probe R² means "the mechanism does help". It fired, and "help" is the wrong wor
 reduces copying and does not help the representation. Same class of mis-specification as E1's
 "any checkpoint". Recorded rather than patched, in `results/regulariser_sweep.json:gate`.
 
+## 14. Better targets make the encoder look like it is learning. It is not.
+
+Added 2026-08-12 from `results/hidden_state_targets.json`, `results/hidden_state_targets_h5.json`
+and `results/residual_probe.json`, E7 and E7c. **This closes the one question the kill criterion
+left open**, and it does so by refuting my own intermediate result.
+
+The plan said the single thing that would restart this programme was not a bigger model but a
+better target set, because finding 10 showed the old one could not detect learned structure. E7
+built that target set: four targets with genuine hidden state at a 10-step forward horizon,
+17,449 windows over 2,727 events, headed by `vol_forecast_error`, which divides the ladder's own
+volatility forecast out of future realised volatility. A parity test asserts the windows are an
+exact subset of the published corpus, so old and new targets are measured on identical data.
+
+**And a training lift appeared, at every readout, at both horizons.**
+
+| readout | dim | untrained → trained | lift, h=10 | lift, h=5 |
+|---|---|---|---|---|
+| `last_patch` | 128 | +0.0358 → +0.0791 | **+0.0433 (+7.73 sd)** | +0.0443 (+3.76 sd) |
+| `concat_patches` | 768 | +0.0487 → +0.0781 | +0.0294 (+3.10 sd) | +0.0363 (+3.50 sd) |
+| `concat_strikes` | 3072 | +0.1022 → +0.1206 | +0.0184 (+3.15 sd) | +0.0143 (+1.68 sd) |
+| `mean_all` | 128 | +0.0644 → +0.0776 | +0.0132 (+0.89 sd) | +0.0153 (+1.98 sd) |
+| `mean_max` | 256 | +0.0677 → +0.0717 | +0.0040 (+0.62 sd) | +0.0177 (+2.12 sd) |
+
+This is the first time in the programme that training moved a probe in the right direction on
+something other than a target documented as derivable. It replicates at an independent horizon to
+the third decimal at `last_patch`, +0.0443 against +0.0433. The martingale control stayed clean
+throughout: the worst `fwd_signed_return` ridge R² across every arm is +0.0064 at h=10 and +0.0042
+at h=5, against a pre-registered void-the-run bar of +0.05.
+
+**It is still reconstruction.** `vol_forecast_error` is `log(realised) - log(implied)`, and
+`log(implied)` is a function of `implied_width`, which is derivable from the input. The same run
+measures a **+0.1392 (+6.30 sd)** training lift on `implied_width` itself at that same readout. So
+an encoder that merely represents the ladder better predicts the `log(implied)` half of the target
+better, and scores higher having learned nothing about the future.
+
+E7c settles it by removing what raw features already explain. Residualising against the 96-dim
+`raw_identity` control, which explains +0.1754 of the target and scores -0.0049 on its own
+residual, then re-probing every arm:
+
+| model | readout | dim | residual ridge R² | t vs zero |
+|---|---|---|---|---|
+| trained | `last_patch` | 128 | +0.0038 ± 0.0045 | 1.68 |
+| trained | `mean_all` | 128 | +0.0007 ± 0.0068 | 0.21 |
+| trained | `concat_strikes` | 3072 | -0.0023 ± 0.0027 | -1.71 |
+| untrained | `concat_strikes` | 3072 | -0.0173 ± 0.0031 | -10.98 |
+
+**No arm reaches a residual R² distinguishable from zero**, the best being t = 1.68 against a
+critical value of 3.182 at 4 seeds. Whatever training did, it added nothing about
+`vol_forecast_error` beyond what 96 raw numbers already carry.
+
+**Raw features still win outright anyway**, before any of this subtlety. On `vol_forecast_error`
+the 96-dim `raw_identity` control scores +0.1747 against +0.1206 for the best trained arm at 3072
+dims, a margin of 13.58 pooled SD; at h=5 it is +0.2363 against +0.1771, 8.69 SD. Note the
+reversal from the old targets, where width helped and made the 3072-dim readout look strong: here
+`raw_full` at 2304 dims falls to +0.1170, and the narrowest control wins.
+
+**The methodological point, which is the transferable part.** Dividing the confound out
+*arithmetically* did not remove it. `vol_forecast_error` was designed so the market's forecast
+cancels, and it still carried enough derivable structure to manufacture a 7.73 sigma effect. Only
+the empirical residualisation removed it, and only because the control was verified to score zero
+on its own residual. A target is not clean because its algebra says so.
+
+**A third gate failed on its wording.** E7c's criterion asked only for a matched-width lift above
+2 pooled SD, never that the trained arm reach a *positive* residual R². It fired on `concat_strikes`,
+whose lift runs from -0.0173 to -0.0023: both endpoints negative, so neither arm predicts the
+residual better than its own mean, and being less bad at an impossible task is not evidence. Same
+class as E1's "at any checkpoint" and E2's "the mechanism helps". Recorded as run in
+`results/residual_probe.json:verdict`, corrected beside it under `verdict_review`.
+
+**So the negative result stands, and stands harder.** It is not an artefact of a badly chosen
+target set. Given targets built specifically to contain hidden state, verified discriminative
+before use, replicated across two horizons, with the derivable part removed empirically rather
+than by assertion, the encoder carries nothing the raw cross-section does not.
+
+## 15. Which regime a probe target is in is knowable before training anything
+
+Added 2026-08-12 from `results/horizon_headroom.json`, E7b. Raw features only, no training, about
+a minute per horizon.
+
+A probe target can only rank representations if it sits between two failure modes. If raw features
+already explain it, gains on it measure input reconstruction. If nothing explains it, it cannot
+separate a good representation from a bad one. Both are measurable in advance, for free, by
+fitting raw features to the target and looking at what is left.
+
+Best raw ridge R², across horizons:
+
+| target | h=5 | h=10 | h=15 | h=20 | regime |
+|---|---|---|---|---|---|
+| `implied_width` | +0.9443 | +0.9684 | +0.9789 | +0.9853 | DERIVABLE |
+| `time_to_expiry` | +0.7811 | +0.8025 | +0.8363 | +0.8206 | DERIVABLE |
+| `log_return_to_settle` | -0.0483 | -0.1346 | -0.0358 | -0.1323 | UNPREDICTABLE |
+| `vol_forecast_error` | +0.2363 | +0.1747 | +0.0719 | -0.0150 | discriminative to h=15 |
+| `fwd_abs_return` | +0.1553 | +0.1873 | +0.1229 | +0.1013 | DISCRIMINATIVE |
+
+**Three of the four targets this entire programme was scored on are in regimes where a probe
+comparison cannot carry information**, at every horizon tested, and the classification needs no
+model, no training and no GPU. Finding 10 took a decomposition experiment and most of a programme
+to establish what this table shows in a minute. Running it first would have redirected the work
+before the encoder was written.
+
+It also answers the obvious objection to E7. `vol_forecast_error` scores *higher* at h=5 (+0.2363)
+than at the h=10 that E7 used (+0.1747), so 10 was not the flattering choice; the finding-14 lift
+was then replicated at h=5 anyway.
+
 ## What this work did not establish
 
 - ~~Whether a longer run separates the trained encoder from its random initialisation.~~
   **Closed by finding 8.** It does not. 32x more compute leaves ridge flat and drives the MLP
   probe 23 pooled standard deviations below the untrained floor.
+- ~~Whether a target set with genuine hidden state would change the verdict.~~ **Closed by
+  finding 14.** It does not. Targets verified discriminative before use, replicated at two
+  horizons, produce a training lift that does not survive removal of what raw features explain.
 - Whether any of this transfers off the Kalshi hourly-crypto corpus. One corpus, one asset
-  class, one venue.
+  class, one venue. Finding 15 gives the cheap way to check before committing to another one.
 - Whether the marginal causal-context effect in finding 4 survives more seeds. At t = 2.56 with
   n = 4 and six comparisons, it probably does not.
 - Anything about trading. No arm beats the raw cross-section, so none of this is deployable.

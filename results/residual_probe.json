@@ -1,0 +1,560 @@
+{
+  "config": {
+    "pm_jepa_root": "$PM_JEPA_ROOT",
+    "horizon": 10,
+    "target": "vol_forecast_error",
+    "control": "raw_identity",
+    "seeds": 4,
+    "steps": 600,
+    "batch": 64,
+    "d_model": 128,
+    "layers": 4,
+    "device": "auto",
+    "out": "results/residual_probe.json"
+  },
+  "device": "mps",
+  "corpus": {
+    "events_readable": 3336,
+    "events_unreadable": 0,
+    "events_too_short": 209,
+    "events_contributing": 2727,
+    "horizon_steps": 10,
+    "max_gap_factor": 2.0,
+    "window": 24,
+    "stride": 4
+  },
+  "control_r2_on_target": 0.17535008556735,
+  "self_r2_bar": 0.02,
+  "n_train": 13763,
+  "n_test": 3686,
+  "runs": [
+    {
+      "model": "raw",
+      "readout": "raw_identity",
+      "seed": null,
+      "dim": 96,
+      "ridge": -0.004921083534452642,
+      "mlp": 0.022393716665956465,
+      "seconds": 1.4
+    },
+    {
+      "model": "raw",
+      "readout": "raw_last_min",
+      "seed": null,
+      "dim": 96,
+      "ridge": -0.0018755685537839017,
+      "mlp": 0.018691851628412692,
+      "seconds": 1.1
+    },
+    {
+      "model": "raw",
+      "readout": "raw_last_4min",
+      "seed": null,
+      "dim": 384,
+      "ridge": -0.00048199404657567335,
+      "mlp": -0.24365369523496172,
+      "seconds": 1.6
+    },
+    {
+      "model": "raw",
+      "readout": "raw_full",
+      "seed": null,
+      "dim": 2304,
+      "ridge": -0.05029504612722069,
+      "mlp": -0.23352784885343736,
+      "seconds": 3.1
+    },
+    {
+      "model": "trained",
+      "readout": "mean_all",
+      "seed": 0,
+      "dim": 128,
+      "ridge": -0.006299977239816457,
+      "mlp": -0.04931387857818881
+    },
+    {
+      "model": "trained",
+      "readout": "last_patch",
+      "seed": 0,
+      "dim": 128,
+      "ridge": -0.0018341555226146777,
+      "mlp": -0.0581195501511238
+    },
+    {
+      "model": "trained",
+      "readout": "mean_max",
+      "seed": 0,
+      "dim": 256,
+      "ridge": -0.005907609668977409,
+      "mlp": -0.23562541028908646
+    },
+    {
+      "model": "trained",
+      "readout": "concat_patches",
+      "seed": 0,
+      "dim": 768,
+      "ridge": -0.007799620990146083,
+      "mlp": -0.20108158903296225
+    },
+    {
+      "model": "trained",
+      "readout": "concat_strikes",
+      "seed": 0,
+      "dim": 3072,
+      "ridge": -0.006410322699669013,
+      "mlp": -0.27557079036169974
+    },
+    {
+      "model": "untrained",
+      "readout": "mean_all",
+      "seed": 0,
+      "dim": 128,
+      "ridge": 0.0010930401117870137,
+      "mlp": -0.047735304077438645
+    },
+    {
+      "model": "untrained",
+      "readout": "last_patch",
+      "seed": 0,
+      "dim": 128,
+      "ridge": -0.0009476436099946639,
+      "mlp": -0.07844374994154535
+    },
+    {
+      "model": "untrained",
+      "readout": "mean_max",
+      "seed": 0,
+      "dim": 256,
+      "ridge": 0.004991420865892882,
+      "mlp": -0.2449525055715811
+    },
+    {
+      "model": "untrained",
+      "readout": "concat_patches",
+      "seed": 0,
+      "dim": 768,
+      "ridge": -0.006270330020821557,
+      "mlp": -0.267055373236482
+    },
+    {
+      "model": "untrained",
+      "readout": "concat_strikes",
+      "seed": 0,
+      "dim": 3072,
+      "ridge": -0.013749247828453548,
+      "mlp": -0.2653419176984566
+    },
+    {
+      "model": "trained",
+      "readout": "mean_all",
+      "seed": 1,
+      "dim": 128,
+      "ridge": 0.011687862427622209,
+      "mlp": -0.06089914377946881
+    },
+    {
+      "model": "trained",
+      "readout": "last_patch",
+      "seed": 1,
+      "dim": 128,
+      "ridge": 0.0007635491174706743,
+      "mlp": -0.09943570911353627
+    },
+    {
+      "model": "trained",
+      "readout": "mean_max",
+      "seed": 1,
+      "dim": 256,
+      "ridge": -0.0030667149785335024,
+      "mlp": -0.32166793119690573
+    },
+    {
+      "model": "trained",
+      "readout": "concat_patches",
+      "seed": 1,
+      "dim": 768,
+      "ridge": 0.0005148243981675238,
+      "mlp": -0.2603838743056124
+    },
+    {
+      "model": "trained",
+      "readout": "concat_strikes",
+      "seed": 1,
+      "dim": 3072,
+      "ridge": 0.0008528762067641082,
+      "mlp": -0.30802341952282997
+    },
+    {
+      "model": "untrained",
+      "readout": "mean_all",
+      "seed": 1,
+      "dim": 128,
+      "ridge": -0.020640406629749197,
+      "mlp": -0.09009791495975739
+    },
+    {
+      "model": "untrained",
+      "readout": "last_patch",
+      "seed": 1,
+      "dim": 128,
+      "ridge": -0.0026521728515791487,
+      "mlp": -0.07520518014030952
+    },
+    {
+      "model": "untrained",
+      "readout": "mean_max",
+      "seed": 1,
+      "dim": 256,
+      "ridge": -0.003862527343784894,
+      "mlp": -0.3656477787642336
+    },
+    {
+      "model": "untrained",
+      "readout": "concat_patches",
+      "seed": 1,
+      "dim": 768,
+      "ridge": -0.011710427991297623,
+      "mlp": -0.2709574887838069
+    },
+    {
+      "model": "untrained",
+      "readout": "concat_strikes",
+      "seed": 1,
+      "dim": 3072,
+      "ridge": -0.017053922675621447,
+      "mlp": -0.31185104122804086
+    },
+    {
+      "model": "trained",
+      "readout": "mean_all",
+      "seed": 2,
+      "dim": 128,
+      "ridge": -0.002935122919306643,
+      "mlp": -0.09069799303120751
+    },
+    {
+      "model": "trained",
+      "readout": "last_patch",
+      "seed": 2,
+      "dim": 128,
+      "ridge": 0.006865913346014829,
+      "mlp": -0.022462970369280466
+    },
+    {
+      "model": "trained",
+      "readout": "mean_max",
+      "seed": 2,
+      "dim": 256,
+      "ridge": -0.01614758265364702,
+      "mlp": -0.23463340545728628
+    },
+    {
+      "model": "trained",
+      "readout": "concat_patches",
+      "seed": 2,
+      "dim": 768,
+      "ridge": -0.003266867313487909,
+      "mlp": -0.17768947388951695
+    },
+    {
+      "model": "trained",
+      "readout": "concat_strikes",
+      "seed": 2,
+      "dim": 3072,
+      "ridge": -0.0023698199597701475,
+      "mlp": -0.3078713935988642
+    },
+    {
+      "model": "untrained",
+      "readout": "mean_all",
+      "seed": 2,
+      "dim": 128,
+      "ridge": -0.004062272002175682,
+      "mlp": -0.06459561317779228
+    },
+    {
+      "model": "untrained",
+      "readout": "last_patch",
+      "seed": 2,
+      "dim": 128,
+      "ridge": -0.002549560823028374,
+      "mlp": -0.13130653433506634
+    },
+    {
+      "model": "untrained",
+      "readout": "mean_max",
+      "seed": 2,
+      "dim": 256,
+      "ridge": 0.0006223363153121664,
+      "mlp": -0.34777586961838414
+    },
+    {
+      "model": "untrained",
+      "readout": "concat_patches",
+      "seed": 2,
+      "dim": 768,
+      "ridge": -0.007440634255221346,
+      "mlp": -0.3038531565627678
+    },
+    {
+      "model": "untrained",
+      "readout": "concat_strikes",
+      "seed": 2,
+      "dim": 3072,
+      "ridge": -0.015935038521203593,
+      "mlp": -0.31960910901368833
+    },
+    {
+      "model": "trained",
+      "readout": "mean_all",
+      "seed": 3,
+      "dim": 128,
+      "ridge": 0.00045227816538051524,
+      "mlp": -0.06706594623544948
+    },
+    {
+      "model": "trained",
+      "readout": "last_patch",
+      "seed": 3,
+      "dim": 128,
+      "ridge": 0.009341228502850574,
+      "mlp": -0.10233045554556752
+    },
+    {
+      "model": "trained",
+      "readout": "mean_max",
+      "seed": 3,
+      "dim": 256,
+      "ridge": -0.007281082179678711,
+      "mlp": -0.2568471730097477
+    },
+    {
+      "model": "trained",
+      "readout": "concat_patches",
+      "seed": 3,
+      "dim": 768,
+      "ridge": -0.004725426779776942,
+      "mlp": -0.19939980529787316
+    },
+    {
+      "model": "trained",
+      "readout": "concat_strikes",
+      "seed": 3,
+      "dim": 3072,
+      "ridge": -0.0011429215109537427,
+      "mlp": -0.3067963645288456
+    },
+    {
+      "model": "untrained",
+      "readout": "mean_all",
+      "seed": 3,
+      "dim": 128,
+      "ridge": -0.015522678821961122,
+      "mlp": -0.10566131491695718
+    },
+    {
+      "model": "untrained",
+      "readout": "last_patch",
+      "seed": 3,
+      "dim": 128,
+      "ridge": -0.0017403333926693243,
+      "mlp": -0.0883033635638324
+    },
+    {
+      "model": "untrained",
+      "readout": "mean_max",
+      "seed": 3,
+      "dim": 256,
+      "ridge": 0.00020271711086283783,
+      "mlp": -0.31965958005876094
+    },
+    {
+      "model": "untrained",
+      "readout": "concat_patches",
+      "seed": 3,
+      "dim": 768,
+      "ridge": -0.007624654916399631,
+      "mlp": -0.29916152507248306
+    },
+    {
+      "model": "untrained",
+      "readout": "concat_strikes",
+      "seed": 3,
+      "dim": 3072,
+      "ridge": -0.022297969281830365,
+      "mlp": -0.2917987511906548
+    }
+  ],
+  "self_r2": -0.004921083534452642,
+  "summary": {
+    "trained|mean_all": {
+      "model": "trained",
+      "readout": "mean_all",
+      "dim": 128,
+      "seeds": 4,
+      "ridge_mean": 0.0007262601084699061,
+      "ridge_std": 0.006763976797323608,
+      "mlp_mean": -0.06699424040607865,
+      "mlp_std": 0.015096509757987805
+    },
+    "trained|last_patch": {
+      "model": "trained",
+      "readout": "last_patch",
+      "dim": 128,
+      "seeds": 4,
+      "ridge_mean": 0.00378413386093035,
+      "ridge_std": 0.004501882202024563,
+      "mlp_mean": -0.07058717129487702,
+      "mlp_std": 0.03283007204152201
+    },
+    "trained|mean_max": {
+      "model": "trained",
+      "readout": "mean_max",
+      "dim": 256,
+      "seeds": 4,
+      "ridge_mean": -0.00810074737020916,
+      "ridge_std": 0.004888116820421531,
+      "mlp_mean": -0.26219347998825654,
+      "mlp_std": 0.035465523331014874
+    },
+    "trained|concat_patches": {
+      "model": "trained",
+      "readout": "concat_patches",
+      "dim": 768,
+      "seeds": 4,
+      "ridge_mean": -0.0038192726713108527,
+      "ridge_std": 0.0029897256184538475,
+      "mlp_mean": -0.20963868563149118,
+      "mlp_std": 0.03071597661310954
+    },
+    "trained|concat_strikes": {
+      "model": "trained",
+      "readout": "concat_strikes",
+      "dim": 3072,
+      "seeds": 4,
+      "ridge_mean": -0.002267546990907199,
+      "ridge_std": 0.0026540004585527467,
+      "mlp_mean": -0.2995654920030599,
+      "mlp_std": 0.013861419151650047
+    },
+    "untrained|mean_all": {
+      "model": "untrained",
+      "readout": "mean_all",
+      "dim": 128,
+      "seeds": 4,
+      "ridge_mean": -0.009783079335524747,
+      "ridge_std": 0.00868680276361944,
+      "mlp_mean": -0.07702253678298637,
+      "mlp_std": 0.022379206628646484
+    },
+    "untrained|last_patch": {
+      "model": "untrained",
+      "readout": "last_patch",
+      "dim": 128,
+      "seeds": 4,
+      "ridge_mean": -0.0019724276693178777,
+      "ridge_std": 0.0006890548438649879,
+      "mlp_mean": -0.0933147069951884,
+      "mlp_std": 0.022458811378882938
+    },
+    "untrained|mean_max": {
+      "model": "untrained",
+      "readout": "mean_max",
+      "dim": 256,
+      "seeds": 4,
+      "ridge_mean": 0.000488486737070748,
+      "ridge_std": 0.0031347774757219064,
+      "mlp_mean": -0.31950893350323994,
+      "mlp_std": 0.04606109084593223
+    },
+    "untrained|concat_patches": {
+      "model": "untrained",
+      "readout": "concat_patches",
+      "dim": 768,
+      "seeds": 4,
+      "ridge_mean": -0.00826151179593504,
+      "ridge_std": 0.002057866273961827,
+      "mlp_mean": -0.28525688591388493,
+      "mlp_std": 0.01639304802505217
+    },
+    "untrained|concat_strikes": {
+      "model": "untrained",
+      "readout": "concat_strikes",
+      "dim": 3072,
+      "seeds": 4,
+      "ridge_mean": -0.017259044576777238,
+      "ridge_std": 0.0031426303643312774,
+      "mlp_mean": -0.29715020478271015,
+      "mlp_std": 0.020981671491034897
+    }
+  },
+  "training_lift_at_matched_readout": {
+    "mean_all": {
+      "dim": 128,
+      "trained": 0.0007262601084699061,
+      "untrained": -0.009783079335524747,
+      "lift": 0.010509339443994653,
+      "in_sd": 0.9545589337502347
+    },
+    "last_patch": {
+      "dim": 128,
+      "trained": 0.00378413386093035,
+      "untrained": -0.0019724276693178777,
+      "lift": 0.005756561530248228,
+      "in_sd": 1.2639810377253358
+    },
+    "mean_max": {
+      "dim": 256,
+      "trained": -0.00810074737020916,
+      "untrained": 0.000488486737070748,
+      "lift": -0.008589234107279908,
+      "in_sd": -1.4791333696057316
+    },
+    "concat_patches": {
+      "dim": 768,
+      "trained": -0.0038192726713108527,
+      "untrained": -0.00826151179593504,
+      "lift": 0.004442239124624187,
+      "in_sd": 1.2239257974935958
+    },
+    "concat_strikes": {
+      "dim": 3072,
+      "trained": -0.002267546990907199,
+      "untrained": -0.017259044576777238,
+      "lift": 0.01499149758587004,
+      "in_sd": 3.6445745767126274
+    }
+  },
+  "verdict": {
+    "decidable": true,
+    "best_lift": {
+      "dim": 3072,
+      "trained": -0.002267546990907199,
+      "untrained": -0.017259044576777238,
+      "lift": 0.01499149758587004,
+      "in_sd": 3.6445745767126274
+    },
+    "survives_residualisation": true,
+    "statement": "NOT RECONSTRUCTION: the matched-width training lift survives removal of everything the raw cross-section explains, so the encoder carries structure about vol_forecast_error that raw features do not."
+  },
+  "verdict_review": {
+    "added": "2026-08-12",
+    "status": "the recorded verdict above is WRONG. It is left exactly as run.",
+    "why": "The criterion required only that the matched-width lift be positive at more than 2 pooled SD. It never required the TRAINED arm to reach a positive R^2 on the residual. It fired on concat_strikes, whose lift runs from -0.0173 to -0.0023: both endpoints are negative R^2, so neither arm predicts the residual better than its own mean. Being less bad at a task neither model can do is not evidence of carrying information.",
+    "corrected_criterion": "the trained arm must ALSO reach a residual R^2 significantly above zero across seeds, not merely above the untrained arm",
+    "best_trained_residual": {
+      "readout": "last_patch",
+      "dim": 128,
+      "ridge_mean": 0.00378413386093035,
+      "ridge_std": 0.004501882202024563,
+      "seeds": 4,
+      "se": 0.0022509411010122817,
+      "t_vs_zero": 1.681134108408509,
+      "df": 3,
+      "t_crit_p05_two_tailed": 3.182,
+      "significant_above_zero": false
+    },
+    "corrected_verdict": "RECONSTRUCTION. No arm reaches a residual R^2 distinguishable from zero; the best is last_patch at +0.0038 +- 0.0045, t = 1.68 against t_crit 3.182. The encoder carries nothing about vol_forecast_error that the 96-dim raw cross-section does not already carry, so the +7.73 pooled SD training lift measured in E7 is the encoder representing the INPUT better rather than learning anything about the future.",
+    "precedent": "third mis-specified gate in this programme, after E1's 'at any checkpoint' and E2's 'the mechanism helps'. Recorded beside the original rather than replacing it, per docs/RESEARCH_PLAN.md rule 1."
+  }
+}

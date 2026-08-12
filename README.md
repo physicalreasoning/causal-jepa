@@ -14,7 +14,7 @@
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-Apache%202.0-blue.svg"></a>
   <img alt="python" src="https://img.shields.io/badge/python-3.11%2B-blue.svg">
   <img alt="pytorch" src="https://img.shields.io/badge/pytorch-2.6-ee4c2c.svg">
-  <a href="FINDINGS.md"><img alt="findings" src="https://img.shields.io/badge/findings-13-success.svg"></a>
+  <a href="FINDINGS.md"><img alt="findings" src="https://img.shields.io/badge/findings-15-success.svg"></a>
   <a href="docs/RESEARCH_PLAN.md"><img alt="pre-registered" src="https://img.shields.io/badge/gates-pre--registered-informational.svg"></a>
 </p>
 
@@ -23,6 +23,8 @@
 A joint-embedding predictive architecture trained on Kalshi strike ladders does not learn a
 representation that beats raw features. We pre-registered four explanations for why; three were
 refuted, and the fourth only surfaced after decomposing the metric everything had been ranked by.
+A fifth, that the targets were simply incapable of detecting learning, was the last one standing
+and is now closed too.
 
 The programme is closed. It is published because the way it failed is more useful than the way it
 would have succeeded.
@@ -37,7 +39,9 @@ would have succeeded.
 | Do anti-collapse regularisers prevent copying? | **Yes**, once actually in the gradient. And it buys nothing |
 | Does the copy diagnostic predict utility? | **No.** Over a 0.198 range its correlation with probe R² is **+0.390**, the wrong sign |
 | Is the objective broken? | **No.** On a simulator with real hidden state it wins, and wins by more as noise rises |
-| So why did it fail? | The probe target set contained no recoverable hidden state |
+| So why did it fail here? | The metric was mostly input reconstruction. Nearly the whole gap sat in a target the corpus code documents as derivable |
+| Would targets with real hidden state change it? | **No.** They produce a +7.7 sigma training lift that vanishes once you remove what raw features already explain |
+| Could you have known in advance? | **Yes.** Three of the four original targets classify as unusable in about a minute, with no training and no model |
 
 The headline number, and the one that reframed everything else:
 
@@ -52,6 +56,21 @@ On `log_return_to_settle`, the only genuinely future target, **all 16 arms land 
 [−0.004, +0.051]**: raw data, untrained encoders and every trained model alike. Nearly the whole
 apparent gap sits in a target the corpus code itself documents as *"derivable from the input ...
 low R² means broken, not interesting."* The metric was largely measuring input reconstruction.
+
+That left one reading open, and it was the only one that could have overturned the result: perhaps
+the targets simply could not detect learning. So we built ones that could, verified them
+discriminative before use, and ran it again. A training lift appeared, +0.0433 (**+7.73 pooled SD**)
+at 128 dims, replicating at a second horizon. It then failed its own control:
+
+```
+vol_forecast_error            best raw (96 dim)   +0.1747   <- still nothing beats this
+                              best JEPA (3072)    +0.1206
+  minus what raw explains     best JEPA, any      +0.0038   <- t = 1.68, indistinguishable from 0
+```
+
+Dividing the market's own forecast out *arithmetically* did not remove the confound; only removing
+it empirically did, and it took the entire effect with it. The encoder carries nothing about this
+target that 96 raw numbers do not.
 
 Full record with every table, objection and falsification criterion: **[FINDINGS.md](FINDINGS.md)**.
 
@@ -80,11 +99,11 @@ in `results/`. A rebuild reproduces the *method* and should reproduce the qualit
 will not reproduce the fourth decimal. For exact reproduction, point at the original snapshot with
 `export PM_JEPA_ROOT=/path/to/pm-jepa`.
 
-With no corpus at all, 36 of the 49 tests still run and 13 skip.
+With no corpus at all, 36 of the 55 tests still run and 19 skip.
 
 ## Reproduce
 
-The five experiments, in the order they ran. Each maps to a finding in
+The eight experiments, in the order they ran. Each maps to a finding in
 [FINDINGS.md](FINDINGS.md), writes `results/<name>.json` with its full config inlined, and prints
 its pre-registered gate outcome.
 
@@ -94,16 +113,24 @@ python3 scripts/convergence.py         --seeds 3 --steps 19200   # does more tra
 python3 scripts/regulariser_sweep.py   --seeds 3 --steps 600     # do the regularisers work?     1.4 h
 python3 scripts/sim_vs_real.py         --seeds 2                 # simulator vs market           see below
 python3 scripts/target_decomposition.py                          # what is the metric made of?   instant
+python3 scripts/horizon_headroom.py                              # can a target rank anything?    1 min
+python3 scripts/hidden_state_targets.py --seeds 4                # do better targets change it?   7 min
+python3 scripts/residual_probe.py       --seeds 4                # is the lift reconstruction?    6 min
 ```
+
+Run `horizon_headroom.py` first. It needs no model and no training, and it is the one that would
+have redirected this programme before any of the others were written.
 
 Supporting runs: `benchmark.py` (all controls in one table, 1 min), `cache_bench.py` (cache
 scaling, no training), `h1_weightmatched.py` (the leak measured at fixed weights, 1 min),
 `experiment.py` (the original 2x2 ablation, 20 min per masking strategy), `build_corpus.py`
-(rebuild the data), `smoke.py` (30-step end-to-end check, seconds).
+(rebuild the data), `smoke.py` (30-step end-to-end check, seconds). The E7 replication at a second
+horizon is `hidden_state_targets.py --horizon 5 --out results/hidden_state_targets_h5.json`.
 
-Timings are wall clock on an M2 Max via MPS, read from the `seconds` fields in the committed
-results rather than estimated. `sim_vs_real.py` is the exception: it never recorded per-run
-timings, so it has no verified figure here. It trains 12 models at 1,500 steps on the simulator
+Timings are wall clock on an M2 Max via MPS. The first five are read from the `seconds` fields in
+the committed results rather than estimated; the three E7 scripts are measured end-to-end wall
+clock of the committed runs, since they record per-probe rather than total time. `sim_vs_real.py`
+is the exception with no verified figure at all: it never recorded per-run timings. It trains 12 models at 1,500 steps on the simulator
 and took roughly an hour and a half when we ran it. Expected values and what to check when a number differs are in
 [docs/REPRODUCE.md](docs/REPRODUCE.md).
 
@@ -139,7 +166,7 @@ recorded as originally written, with the correction beside them rather than repl
 ## Layout
 
 ```
-causaljepa/       model, cache, masking, diagnostics, regularisers, probes, corpus builder
+causaljepa/       model, cache, masking, diagnostics, regularisers, probes, targets, corpus builder
 scripts/          one experiment per file, each writing results/<name>.json
 results/          every raw result, full config inlined
 FINDINGS.md       the findings record, corrections included
@@ -152,10 +179,16 @@ docs/
 
 ## Limitations
 
-One corpus, one asset class, one venue. 1.8M parameters. The negative result is about *this target
-set*, not prediction markets in general: a target with genuine hidden state, such as realised
-volatility over a future window or the settlement of a correlated market, has not been tried. That is what
-would restart this, not a bigger model.
+One corpus, one asset class, one venue. 1.8M parameters. Realised volatility over a future window
+was the obvious escape hatch and it has now been tried, at two horizons, with the derivable part
+removed empirically; it did not change the verdict. The settlement of a *correlated* market remains
+untested and is the last version of that idea standing.
+
+Two bounds worth stating plainly. `implied_spot` is reconstructed from the ladder, so realised
+volatility computed from it carries our own reconstruction noise; this is identical across arms and
+does not bias comparisons between them, but an absolute R² here is not an R² against Bitcoin's
+realised volatility. And every probe is linear or a fixed small MLP on a frozen encoder, so this
+bounds what is *linearly accessible*, not what a fine-tuned model could extract.
 
 ## References
 

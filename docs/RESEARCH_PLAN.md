@@ -235,6 +235,13 @@ hidden state, such as realised volatility over a future window or the settlement
 correlated market, would be a real test and has never been run. That is a new programme with a
 new pre-registration, not a continuation of this one.
 
+> **Run on 2026-08-12 as E7, under Pre-registration 2 below.** Realised volatility over a future
+> window was the target, exactly as named here. It did not restart the programme. A training lift
+> appeared and then failed the control that removes what raw features already explain; see finding
+> 14. This paragraph is left as written because it was the correct call at the time, and because
+> the experiment it specified is the reason the negative result can now be stated without the
+> caveat it was carrying.
+
 That combination means the JEPA objective cannot extract structure from prediction-market ladders
 that raw features do not already carry, that the failure is a property of the data rather than of
 our implementation, and that we have measured exactly why. Written honestly, that is a better
@@ -243,6 +250,111 @@ stop there.
 
 **Do not** continue past this on the grounds that a bigger model or a longer run might work. The
 plan above is designed to rule that out before the question is asked.
+
+---
+
+# Pre-registration 2, 2026-08-12: E7, the target set
+
+The kill criterion above fired and the programme it governed is closed. It named exactly one thing
+that would restart the work, and it is the thing below:
+
+> A target with genuine hidden state, such as realised volatility over a future window or the
+> settlement of a different correlated market, would be a real test and has never been run. That is
+> a new programme with a new pre-registration, not a continuation of this one.
+
+This is that new pre-registration. It is written and committed **before the run**, and it governs
+only E7. Nothing here reinterprets a gate above.
+
+### The question
+
+The old result is under-determined, and it has been from the start. Two readings survive every
+measurement taken so far:
+
+- **(a)** a JEPA learns nothing useful on this data, or
+- **(b)** the target set contained no recoverable hidden state, so no encoder could have
+  demonstrated anything and the comparison was never able to discriminate.
+
+Finding 10 is what makes this live rather than pedantic: `implied_width` carried nearly the whole
+apparent gap and is documented upstream as derivable from the input, while `log_return_to_settle`
+put all 16 arms inside [-0.0043, +0.0510]. One target was a function of the input and the other was
+unpredictable. A metric built from those two cannot rank representations, whatever the model does.
+
+### The targets
+
+`causaljepa/targets.py`, all built from arrays `build_corpus.py` already snapshots, at a forward
+horizon of 10 steps measured in wall clock rather than array index:
+
+| target | what it is | why it is here |
+|---|---|---|
+| `fwd_realised_vol` | realised volatility of `implied_spot` over the next horizon | genuinely future and path-dependent, but partly forecastable, so not a clean test alone |
+| `vol_forecast_error` | `log(realised / implied)` over the same horizon | **the headline.** The ladder's own forecast is divided out by construction, so the part `implied_width` already carried is removed |
+| `fwd_abs_return` | magnitude of the future move | coarser cousin of realised vol, no path dependence |
+| `fwd_signed_return` | signed future move | **negative control.** A ten-minute near-martingale that nothing should predict |
+
+### Hard precondition
+
+Every arm must score at or below **+0.05 ridge R²** on `fwd_signed_return`. Anything above that has
+seen the future through its features, and the run is void rather than interesting. This is an
+assertion in the script, not a log line, on the E2 precedent.
+
+### Gate
+
+Stated in pooled SD across seeds, with a minimum of 2 seeds for the gate to be evaluated at all.
+Below that the pooled SD is exactly zero, every margin is `nan`, and both branches would read as
+"not met"; E1 and E2 were each decided by a gate whose wording admitted a degenerate case, so this
+one refuses to return a verdict instead.
+
+- Best trained arm beats the best raw control on `vol_forecast_error` by **more than 2 pooled SD**
+  → the negative result was a property of the **target set**. The programme reopens here.
+- **No** new target shows a matched-width training lift above 2 pooled SD
+  → the negative result **generalises**: it survives contact with targets that do contain hidden
+  state, and reading (a) is the right one.
+- Anything between → report the frontier and claim nothing.
+
+### What makes it a fair test
+
+1. The arms are **imported** from `readout_ablation.py`, not reimplemented, so the raw controls,
+   the readouts and the extraction are bit-identical to E4's. A difference in the table is a
+   difference in the targets.
+2. Both target blocks are probed on **the same windows**. The horizon requirement drops windows near
+   the end of each event, so the original four are recomputed on the surviving subset and reported
+   beside the new four; otherwise a change could be the subset rather than the targets.
+3. The blocks are probed **separately**, so each picks its own ridge lambda. Eight mixed columns
+   would let the new targets shift the lambda chosen for the old ones and silently break
+   comparability with every published number in this repo.
+4. Every trained arm is paired with an **untrained encoder at the same readout width**, per rule 5.
+
+### Outcome, 2026-08-12: PARTIAL, then resolved against the model by E7c
+
+The gate returned **PARTIAL** at both horizons, and the partial half was real: a matched-width
+training lift of **+0.0433 (+7.73 pooled SD)** on `vol_forecast_error` at the 128-dim `last_patch`
+readout, replicating at h=5 at **+0.0443 (+3.76 sd)**. Raw features nonetheless won the headline
+target outright, 96 dims at +0.1747 against +0.1206 for the best trained arm at 3072 dims, a
+margin of 13.58 pooled SD. The martingale precondition held everywhere, worst +0.0064 against the
++0.05 bar.
+
+The lift did not survive its own control. **E7c** removed what the raw cross-section explains and
+re-probed: no arm reaches a residual R² distinguishable from zero, best t = 1.68 against a critical
+3.182. The lift is the encoder representing the INPUT better, which the same run confirms directly
+with a +0.1392 training lift on `implied_width`. Full record in finding 14.
+
+**E7c's own gate was mis-specified**, the third in this programme. It asked only for a lift above 2
+pooled SD and never that the trained arm reach a positive residual R², so it fired on a lift running
+between two negative numbers. Recorded as run in `results/residual_probe.json:verdict`, corrected
+beside it under `verdict_review`, script criterion tightened for future runs.
+
+**The programme stays closed, and the closure is now much stronger.** The one reading the kill
+criterion could not exclude, that the target set was incapable of detecting learning, has been
+tested directly and rejected. Do not reopen this on the grounds that some other target might work;
+`scripts/horizon_headroom.py` will classify a candidate target in about a minute, and a target that
+comes back DERIVABLE or UNPREDICTABLE cannot rank representations no matter what is trained on it.
+
+### Stated in advance, because it bounds the claim
+
+`implied_spot` is itself reconstructed from the ladder, so its increments carry reconstruction noise
+and `fwd_realised_vol` overstates true realised volatility. This is identical across arms and does
+not bias the comparison between them, but an absolute R² here is not an R² against Bitcoin's
+realised volatility, and it will not be reported as one.
 
 ---
 

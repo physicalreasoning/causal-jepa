@@ -553,6 +553,45 @@ the moment the pm-jepa module body executes, which does cover it.
 
 ---
 
+## 11b. The E7 target-set experiments
+
+These three run on the same corpus but slice it differently: requiring a forward horizon drops
+windows near the end of every event, so the corpus line reads `(17449, 24, 24, 4)` over 2,727
+events at `--horizon 10`, not the usual 25,818 over 3,127. That is expected, and
+`tests/test_target_parity.py` asserts the survivors are an exact subset of the published windows.
+
+```bash
+python3 scripts/horizon_headroom.py                          # 1 min, no training
+python3 scripts/hidden_state_targets.py --seeds 4            # 7 min
+python3 scripts/hidden_state_targets.py --seeds 4 --horizon 5 \
+        --out results/hidden_state_targets_h5.json           # 7 min, the replication
+python3 scripts/residual_probe.py --seeds 4                  # 6 min
+```
+
+Expected values, 4 seeds, 600 steps, M2 Max via MPS:
+
+| quantity | expected | where |
+|---|---|---|
+| `implied_width`, best raw ridge | +0.94 to +0.99 at every horizon, classified DERIVABLE | `horizon_headroom.json` |
+| `log_return_to_settle`, best raw ridge | negative at every horizon, classified UNPREDICTABLE | `horizon_headroom.json` |
+| `vol_forecast_error`, best raw ridge | +0.2363 at h=5, +0.1747 at h=10 | `horizon_headroom.json` |
+| worst `fwd_signed_return` ridge, any arm | +0.0064 at h=10, +0.0042 at h=5, both well under the +0.05 void bar | `hidden_state_targets*.json` |
+| matched-width lift, `last_patch`, `vol_forecast_error` | +0.0433 (+7.73 sd) at h=10, +0.0443 (+3.76 sd) at h=5 | `hidden_state_targets*.json` |
+| best raw vs best trained, `vol_forecast_error` | +0.1747 (96 dim) vs +0.1206 (3072 dim), margin -13.58 sd | `hidden_state_targets.json` |
+| `raw_identity` on its own residual | -0.0049, must be inside +-0.02 or the run aborts | `residual_probe.json` |
+| best trained arm on the residual | +0.0038 +- 0.0045, t = 1.68, NOT above zero | `residual_probe.json` |
+
+**The one that matters is the last row.** The whole of finding 14 turns on no arm reaching a
+residual R^2 distinguishable from zero. If a trained arm comes back significantly positive there,
+finding 14 is wrong and the programme reopens.
+
+**Read `verdict` and `verdict_review` together in `residual_probe.json`.** The recorded `verdict`
+says NOT RECONSTRUCTION and is wrong; it fired on a lift running between two negative R^2 values.
+It is preserved as run, with the correction beside it, per rule 1. The script's criterion has since
+been tightened, so a fresh run prints the corrected verdict and will not match the stored one.
+
+---
+
 ## 12. Triage: what to check when a number comes out different
 
 | symptom | first thing to check | then |
@@ -585,6 +624,10 @@ the moment the pm-jepa module body executes, which does cover it.
 | `results/h1_weight_matched.json` | 3 KB | H1 read out both ways on identical weights, per-patch cosines |
 | `results/cache_bench.json` | 85 KB | H4, per-tick timings, `regime` caveat inlined |
 | `results/smoke.json` | 2 KB | smoke summary, not a result |
+| `results/horizon_headroom.json` | 31 KB | target regime by horizon, raw features only, no training |
+| `results/hidden_state_targets.json` | 94 KB | E7 at horizon 10, per-seed per-target probe fits, both target blocks |
+| `results/hidden_state_targets_h5.json` | 94 KB | the same at horizon 5, the replication |
+| `results/residual_probe.json` | 15 KB | E7c, the control that decides finding 14; carries `verdict_review` |
 | `results/_driver-exercise-60steps-not-a-result.json` | 22 KB | a 60-step driver exercise, named so nobody quotes it |
 
 Every results file inlines its full config. A file with a bare R^2 and no corpus
