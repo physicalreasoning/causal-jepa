@@ -555,6 +555,91 @@ It also answers the obvious objection to E7. `vol_forecast_error` scores *higher
 than at the h=10 that E7 used (+0.1747), so 10 was not the flattering choice; the finding-14 lift
 was then replicated at h=5 anyway.
 
+## 16. Realised correlation between two assets is real, recoverable, and in neither ladder alone
+
+Added 2026-08-12 from `results/crossasset_headroom.json`, E8a. Raw features only, no training.
+**This is the one unambiguously positive result in the programme**, and it is not about the model.
+
+The cached corpus was never one asset. It holds 1,675 KXBTCD and 1,661 KXETHD events over the same
+ten weeks, and 99.1% of BTC events have a time-overlapping ETH event. The series label is recoverable
+by recomputing `build_corpus.py`'s cache keys, so this needed no network access. Pairing on the
+intersection of actual timestamps, rather than nominal event windows, gives 1,021 usable pairs at
+`window=24, horizon=10`; the binding constraint is that the median pair shares only 37 valid minutes.
+
+A strike ladder is a **marginal** distribution: it prices where one asset lands. The **dependence**
+between two assets is in neither ladder at any strike. That makes realised correlation the first
+target in this corpus that no single cross-section identifies, and the data agrees:
+
+| target, h=10 | BTC only | ETH only | both | gain vs width-matched single |
+|---|---|---|---|---|
+| **`realised_corr`** | +0.1867 | +0.2520 | **+0.3693** | **+0.1064** |
+| `eth_vol_forecast_error` | +0.0109 | +0.1363 | +0.1302 | -0.0048 |
+| `fwd_abs_spread_return` | +0.0174 | +0.1519 | +0.1499 | -0.0014 |
+| `vol_ratio_forecast_error` | +0.0211 | +0.1293 | +0.1189 | -0.0076 |
+
+The gain is measured against **ETH duplicated to the same 48 strikes**, so it is the second asset
+rather than the extra columns; E4 is why that control is not optional. It rises monotonically with
+horizon, +0.0271 at h=3, +0.0794 at h=5, +0.1064 at h=10, consistent with realised correlation being
+better estimated over longer windows.
+
+**The other rows are the control that makes this credible.** Targets that should not need both
+assets get no gain from the second ladder, and three of them come in slightly negative. Only the
+one quantity that is theoretically joint behaves as though it is joint. Nothing here is a width
+artefact or a fishing expedition.
+
+## 17. The JEPA loses even where the latent provably exists, and the lift is reconstruction again
+
+Added 2026-08-12 from `results/crossasset_jepa.json` and `results/residual_probe_cross.json`, E8
+and E8c.
+
+Finding 16 supplies what every previous experiment lacked: a target with a real cross-sectional
+latent, verified before training. The pairing also leaves only 2,654 training windows against E7's
+13,763, so wide raw readouts overfit and a compressed representation has more room here than
+anywhere else in the programme. These are the most favourable conditions a JEPA gets on this corpus.
+
+**It produced the largest training signal in the programme.** Matched-width lift on `realised_corr`:
+
+| readout | dim | untrained → trained | lift |
+|---|---|---|---|
+| `last_patch` | 128 | +0.1280 → +0.2099 | **+0.0819 (4.54 sd)** |
+| `concat_patches` | 768 | +0.1452 → +0.1983 | +0.0531 (3.27 sd) |
+| `concat_strikes` | 6144 | +0.3259 → +0.3457 | +0.0198 (3.38 sd) |
+
+**Raw features still win**, +0.3693 at 768 dims against +0.3457 for the best trained arm at 6144,
+a margin of 6.58 pooled SD.
+
+**And the lift is reconstruction, exactly as in finding 14.** Residualising against the both-ladder
+raw readout, which explains +0.3693 of the target:
+
+| model | readout | dim | residual ridge R² |
+|---|---|---|---|
+| **untrained** | `mean_all` | 128 | **+0.0077 ± 0.0018** |
+| trained | `last_patch` | 128 | +0.0042 ± 0.0022 |
+| trained | `concat_strikes` | 6144 | -0.0555 ± 0.0065 |
+| untrained | `concat_strikes` | 6144 | -0.0813 ± 0.0027 |
+
+**The best untrained arm outscores every trained arm on the residual.** A random-initialised
+encoder carries more of what raw features miss than any trained one does, so the small surviving
+signal is the architecture acting as a random projection, not a product of training.
+
+**The generalisable result, and it is the most useful thing in this document.** The matched-width
+training lift is the standard evidence that self-supervised pretraining worked. It has now been
+measured at **+7.73 pooled SD** (finding 14) and **+4.54 pooled SD** (here), on different targets,
+different corpora and different input geometries, and **both times it vanished under a control that
+costs one extra minute**. Twice is a pattern, not an accident: an encoder trained to predict masked
+parts of its input gets better at representing that input, and any target with a component the input
+can compute will reward that without a single bit of new information having been learned. A lift
+over an untrained encoder at matched width is necessary evidence of learning something useful. It is
+nowhere near sufficient.
+
+**A fourth criterion failed on its wording**, and this one needed two rounds. E8c's check required a
+lift above 2 pooled SD plus a trained arm above zero, and both were satisfied **by different arms**,
+one clearing zero while a second, entirely negative, supplied the lift. The condition that actually
+decides it, that a trained arm must beat the best *untrained* arm on the residual, was missing.
+Recorded as run in `results/residual_probe_cross.json:verdict`, corrected under `verdict_review`.
+Four wording failures across sixteen gates is itself worth reporting: a threshold fixed in advance
+is still only as good as the failure modes its author imagined.
+
 ## What this work did not establish
 
 - ~~Whether a longer run separates the trained encoder from its random initialisation.~~
@@ -563,8 +648,12 @@ was then replicated at h=5 anyway.
 - ~~Whether a target set with genuine hidden state would change the verdict.~~ **Closed by
   finding 14.** It does not. Targets verified discriminative before use, replicated at two
   horizons, produce a training lift that does not survive removal of what raw features explain.
-- Whether any of this transfers off the Kalshi hourly-crypto corpus. One corpus, one asset
-  class, one venue. Finding 15 gives the cheap way to check before committing to another one.
+- ~~Whether a target needing a genuine cross-sectional latent would change the verdict.~~
+  **Closed by finding 17.** It does not, on the most favourable conditions this corpus offers.
+- Whether any of this transfers off Kalshi hourly crypto. Two assets now, but one venue and one
+  asset class. Finding 15 gives the cheap way to check before committing to another corpus.
+- Whether realised correlation between paired ladders is *tradeable*. Finding 16 says it is
+  recoverable at +0.3693 from raw features; nothing here touches costs, capacity or execution.
 - Whether the marginal causal-context effect in finding 4 survives more seeds. At t = 2.56 with
   n = 4 and six comparisons, it probably does not.
 - Anything about trading. No arm beats the raw cross-section, so none of this is deployable.

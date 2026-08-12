@@ -36,17 +36,38 @@ SANITY CHECK, printed and asserted: the residualising control itself must score
 approximately zero on its own residual. If it does not, the residualisation did
 not work and nothing below means anything.
 
-THE VERDICT NEEDS TWO CONDITIONS, NOT ONE. As first written, this script asked
-only whether the trained arm beat the untrained one on the residual by more than
-2 pooled SD. It fired, on a lift running from -0.0173 to -0.0023, where both
-endpoints are negative R^2 and neither arm predicts the residual better than its
-own mean. Being less bad at a task neither model can do is not evidence of
-carrying information. The criterion now also requires the trained arm to reach a
-residual R^2 significantly above ZERO. The original verdict is preserved as run
-in `results/residual_probe.json` with the correction beside it under
-`verdict_review`, rather than being quietly overwritten; this is the third gate
-in this programme to fail on its wording, after E1's "at any checkpoint" and
-E2's "the mechanism helps".
+ALSO RUNS ON THE CROSS-ASSET CORPUS via `--corpus cross`, where the target is
+`realised_corr` and the control subtracted is the both-ladder raw readout. E8
+measured a +0.0819 (+4.54 pooled SD) matched-width lift there, on a target E8a
+proved needs both assets. It failed this control too.
+
+THE VERDICT NEEDS THREE CONDITIONS, AND IT TOOK TWO FAILURES TO FIND THEM ALL.
+
+  1. A matched-width lift above 2 pooled SD. As first written this was the ONLY
+     condition, and it fired on a lift running from -0.0173 to -0.0023: both
+     endpoints negative R^2, so neither arm predicts the residual better than
+     its own mean. Being less bad at a task neither model can do is not
+     evidence of carrying information.
+
+  2. The trained arm must reach a residual R^2 significantly above ZERO. Added
+     after failure 1. Not sufficient either: on the cross-asset run conditions
+     1 and 2 were satisfied by DIFFERENT ARMS, one clearing zero while a second,
+     entirely negative one supplied the lift.
+
+  3. That trained arm must also BEAT THE BEST UNTRAINED ARM on the residual.
+     This is what actually decided it. On the cross-asset run the best untrained
+     arm scored +0.0077 against the best trained arm's +0.0042, so the small
+     surviving signal is the architecture behaving as a random projection, not
+     anything training produced.
+
+Both original verdicts are preserved as run, in `results/residual_probe.json`
+and `results/residual_probe_cross.json`, with corrections beside them under
+`verdict_review` rather than quietly overwritten. Counting E1's "at any
+checkpoint" and E2's "the mechanism helps", four criteria in this programme have
+now failed on their wording. That rate is itself a finding: a threshold stated
+before seeing the data is still only as good as the failure modes its author
+imagined, which is the argument for keeping the original next to the correction
+instead of editing history.
 """
 import argparse
 import json
@@ -116,6 +137,10 @@ def main():
     ap.add_argument("--pm-jepa-root",
                     default=os.environ.get("PM_JEPA_ROOT", "../pm-jepa"))
     ap.add_argument("--horizon", type=int, default=10)
+    ap.add_argument("--corpus", default="single", choices=("single", "cross"),
+                    help="'single' probes E7's one-asset targets; 'cross' probes "
+                         "E8's BTC+ETH corpus, where the control to subtract is "
+                         "the both-ladder raw readout")
     ap.add_argument("--target", default="vol_forecast_error")
     ap.add_argument("--control", default="raw_identity",
                     help="raw control whose prediction is subtracted out")
@@ -129,13 +154,27 @@ def main():
     args = ap.parse_args()
 
     device = pick_device(args.device)
-    X, _Yo, Yn, owner, _on, nn_, cstats = cj_targets.load_corpus(
-        args.pm_jepa_root, horizon=args.horizon)
+    if args.corpus == "cross":
+        from causaljepa import crossasset as ca
+        import crossasset_headroom as e8a
+        X, Y, owner, nn_, cstats = ca.load_corpus(
+            args.pm_jepa_root, horizon=args.horizon)
+        # Same four views E8 controlled against, flattened into one dict so the
+        # residualising control can be named on the command line.
+        raw = {"{}|{}".format(v, r): f
+               for v, V in e8a.views(X).items()
+               for r, f in e8a.raw_features(V).items()}
+        if args.target == "vol_forecast_error":
+            args.target = "realised_corr"
+        if args.control == "raw_identity":
+            args.control = "both|last_4min"
+    else:
+        X, _Yo, Y, owner, _on, nn_, cstats = cj_targets.load_corpus(
+            args.pm_jepa_root, horizon=args.horizon)
+        raw = e4.raw_controls(X)
     tr, te = cj_data.split_by_event(owner)
     ti = list(nn_).index(args.target)
-    y = Yn[:, ti].astype(np.float64)
-
-    raw = e4.raw_controls(X)
+    y = Y[:, ti].astype(np.float64)
     ctl = raw[args.control].astype(np.float64)
     r_tr, r_te, ctl_r2 = residualise(ctl[tr], ctl[te], y[tr], y[te])
     print("device {}  corpus {}  train {} / test {}".format(
@@ -166,10 +205,22 @@ def main():
 
     self_r2 = next(r["ridge"] for r in res["runs"] if r["readout"] == args.control)
     res["self_r2"] = self_r2
-    assert abs(self_r2) < SELF_R2_BAR, (
-        "RESIDUALISATION FAILED: the control {} scores ridge R^2 {:+.4f} on its "
-        "own residual, which should be ~0. Nothing downstream is "
-        "interpretable.".format(args.control, self_r2))
+    # ONE-SIDED ON PURPOSE. The failure this guards against is the control still
+    # predicting its own residual, which would mean the subtraction did not
+    # remove its information and nothing downstream is interpretable. A NEGATIVE
+    # self-R^2 is the opposite of that failure: the control cannot predict the
+    # residual even slightly. It shows up whenever the control is wide relative
+    # to the sample (768 features against 2,654 training rows on the cross-asset
+    # corpus gives -0.0341), because refitting on train then picks up noise that
+    # does not generalise. Penalising it would abort a perfectly clean run; the
+    # first version of this check was two-sided and did exactly that.
+    res["self_r2_note"] = (
+        "negative self-R^2 means the control cannot re-predict its own residual, "
+        "which is the intended outcome; only a positive value invalidates the run")
+    assert self_r2 < SELF_R2_BAR, (
+        "RESIDUALISATION FAILED: the control {} still scores ridge R^2 {:+.4f} on "
+        "its own residual, so its information was not removed. Nothing "
+        "downstream is interpretable.".format(args.control, self_r2))
 
     for seed in range(args.seeds):
         print("\n--- seed {} ---".format(seed), flush=True)
@@ -251,11 +302,26 @@ def main():
             t_crit = {2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776}.get(bt["seeds"], 2.776)
             above_zero = bool(t_vs_zero > t_crit)
 
-    survives = bool(lift_survives and above_zero)
+    # THIRD CONDITION, and it is the one that decided the cross-asset run. The
+    # criterion above can be satisfied by TWO DIFFERENT ARMS: one clearing zero
+    # while a second, entirely negative, supplies the lift. On E8 it was exactly
+    # that, and worse, the best UNTRAINED arm outscored every trained arm on the
+    # residual, which means the small surviving signal is the architecture
+    # acting as a random projection rather than anything training produced. A
+    # trained arm must beat the untrained arms on the residual, not merely beat
+    # zero.
+    bu = max((v for v in summary.values() if v["model"] == "untrained"),
+             key=lambda v: v["ridge_mean"], default=None)
+    beats_untrained = bool(bt and bu and bt["ridge_mean"] > bu["ridge_mean"])
+    res_beats = {"best_trained": bt["readout"] if bt else None,
+                 "best_untrained": bu["readout"] if bu else None,
+                 "trained_beats_untrained_on_residual": beats_untrained}
+    survives = bool(lift_survives and above_zero and beats_untrained)
     res["verdict"] = {
         "decidable": args.seeds >= 2,
         "best_lift": best,
         "lift_above_untrained": lift_survives,
+        "residual_ranking": res_beats,
         "best_trained_residual": (
             {"readout": bt["readout"], "dim": bt["dim"],
              "ridge_mean": bt["ridge_mean"], "ridge_std": bt["ridge_std"],
@@ -268,10 +334,11 @@ def main():
             "trained arm reaches a residual R^2 above zero, so the encoder "
             "carries structure about {} that raw features do "
             "not.".format(args.target) if survives else
-            "RECONSTRUCTION: no arm reaches a residual R^2 distinguishable from "
-            "zero (best trained t = {:.2f} against zero). Whatever the training "
-            "lift measured, it is not information about {} beyond what the raw "
-            "cross-section already carries.".format(t_vs_zero, args.target))}
+            "RECONSTRUCTION: the training lift does not survive. Best trained arm "
+            "on the residual t = {:.2f} against zero, and trained beats untrained "
+            "on the residual: {}. Whatever the lift measured, it is not "
+            "information about {} beyond what the raw cross-section already "
+            "carries.".format(t_vs_zero, beats_untrained, args.target))}
 
     w = 84
     print("\n" + "=" * w)

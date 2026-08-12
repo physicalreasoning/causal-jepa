@@ -358,6 +358,60 @@ realised volatility, and it will not be reported as one.
 
 ---
 
+# Pre-registration 3, 2026-08-12: E8, the cross-sectional latent
+
+The last untested idea in this repo was "the settlement of a different correlated market". This is
+it, and it is the only version of the escape hatch still standing after E7.
+
+### Why it is not just another lap
+
+Findings 11 and 12 could not explain why the simulator wins and the market does not. The structural
+difference that survives every test: the simulator observes a 3-dimensional latent through **eight
+heterogeneous markets**, none of which identifies it alone, while a Kalshi BTC ladder is 24 strikes
+that are a smooth function of **two numbers**. There was never a latent for the encoder to recover.
+
+The cached corpus turns out to hold two assets, 1,675 KXBTCD and 1,661 KXETHD events over the same
+ten weeks, 99.1% time-overlapping. A strike ladder is a **marginal** distribution; the **dependence**
+between two assets is in neither ladder. That makes realised correlation a genuine joint latent, and
+reproduces the simulator's geometry on real data.
+
+### Gate, stated before the run
+
+- **E8a, free:** if the best width-matched cross-asset gain on any discriminative target is below
+  +0.02, the premise is wrong and we stop without training. Above it, proceed.
+- **E8:** best trained arm beats the best raw control on `realised_corr` by more than 2 pooled SD
+  → the JEPA wins where the latent exists, and we can name the property that was missing.
+- No matched-width lift above 2 pooled SD → the objective fails even where the latent provably
+  exists, a far stronger negative than findings 1 to 15.
+- **E8c is mandatory regardless of outcome.** After finding 14, no lift on this corpus is reported
+  as learning until it survives removal of what raw features explain.
+
+### Outcome: premise confirmed, model still loses
+
+**E8a PROCEEDED**, and it is finding 16, the one clean positive in the programme. `realised_corr`
+scores +0.1867 from BTC alone, +0.2520 from ETH alone and +0.3693 from both, a **+0.1064** gain over
+a width-matched duplicated ladder, rising monotonically with horizon. Targets that should not need
+both assets show no gain, which is the control that makes it credible.
+
+**E8 came back PARTIAL.** Largest training signal in the programme, +0.0819 (+4.54 pooled SD) at the
+128-dim `last_patch` readout, and raw features still win by 6.58 pooled SD.
+
+**E8c killed it**, exactly as E7c did. The best untrained arm scores +0.0077 on the residual against
+the best trained arm's +0.0042. A random-initialised encoder carries more of what raw features miss
+than any trained one. Finding 17.
+
+**A fourth criterion failed on its wording**, and needed two rounds to fix: E8c's conditions were
+satisfied by *different arms*, one clearing zero while a second, entirely negative, supplied the
+lift. The missing condition was that a trained arm must beat the best *untrained* arm. Recorded as
+run in `results/residual_probe_cross.json`, corrected under `verdict_review`.
+
+**The programme is closed for good on this corpus.** Every escape hatch named in advance has now
+been opened and found empty: more training (E1), the readout (E4), the regularisers (E2), the
+signal-to-noise story (E3), the target set (E7), and the cross-sectional latent (E8). What remains
+is not a different target on Kalshi, it is a different domain.
+
+---
+
 ## Order of operations
 
 ```

@@ -14,7 +14,7 @@
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-Apache%202.0-blue.svg"></a>
   <img alt="python" src="https://img.shields.io/badge/python-3.11%2B-blue.svg">
   <img alt="pytorch" src="https://img.shields.io/badge/pytorch-2.6-ee4c2c.svg">
-  <a href="FINDINGS.md"><img alt="findings" src="https://img.shields.io/badge/findings-15-success.svg"></a>
+  <a href="FINDINGS.md"><img alt="findings" src="https://img.shields.io/badge/findings-17-success.svg"></a>
   <a href="docs/RESEARCH_PLAN.md"><img alt="pre-registered" src="https://img.shields.io/badge/gates-pre--registered-informational.svg"></a>
 </p>
 
@@ -42,6 +42,8 @@ would have succeeded.
 | So why did it fail here? | The metric was mostly input reconstruction. Nearly the whole gap sat in a target the corpus code documents as derivable |
 | Would targets with real hidden state change it? | **No.** They produce a +7.7 sigma training lift that vanishes once you remove what raw features already explain |
 | Could you have known in advance? | **Yes.** Three of the four original targets classify as unusable in about a minute, with no training and no model |
+| Is there anything real in this data? | **Yes.** Realised correlation between paired BTC and ETH ladders needs both: +0.3693 against +0.2629 width-matched |
+| Does a cross-sectional latent save the JEPA? | **No.** Its largest lift yet, +4.54 sigma, dissolves under the same control |
 
 The headline number, and the one that reframed everything else:
 
@@ -99,11 +101,11 @@ in `results/`. A rebuild reproduces the *method* and should reproduce the qualit
 will not reproduce the fourth decimal. For exact reproduction, point at the original snapshot with
 `export PM_JEPA_ROOT=/path/to/pm-jepa`.
 
-With no corpus at all, 36 of the 55 tests still run and 19 skip.
+With no corpus at all, 36 of the 61 tests still run and 25 skip.
 
 ## Reproduce
 
-The eight experiments, in the order they ran. Each maps to a finding in
+The ten experiments, in the order they ran. Each maps to a finding in
 [FINDINGS.md](FINDINGS.md), writes `results/<name>.json` with its full config inlined, and prints
 its pre-registered gate outcome.
 
@@ -116,6 +118,8 @@ python3 scripts/target_decomposition.py                          # what is the m
 python3 scripts/horizon_headroom.py                              # can a target rank anything?    1 min
 python3 scripts/hidden_state_targets.py --seeds 4                # do better targets change it?   7 min
 python3 scripts/residual_probe.py       --seeds 4                # is the lift reconstruction?    6 min
+python3 scripts/crossasset_headroom.py                           # do two ladders beat one?       1 min
+python3 scripts/crossasset_jepa.py      --seeds 4                # the most favourable test       4 min
 ```
 
 Run `horizon_headroom.py` first. It needs no model and no training, and it is the one that would
