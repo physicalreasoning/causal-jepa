@@ -895,6 +895,80 @@ right tool for a filtering problem, pointed at a forecasting problem. **This is 
 predicts that a Kalshi target which is genuinely current-but-hidden, rather than future, would show
 a surviving lift, and no such target has been built.
 
+## 21. The current/forecast split is wrong. And the encoder does learn something real, on the target we never checked.
+
+Added 2026-08-12 from `results/state_vs_forecast.json`, E11. **This refutes finding 20's
+hypothesis and corrects this programme's headline claim.** Two results, and the second matters more.
+
+### The hypothesis is refuted
+
+Finding 20 predicted that current-but-hidden targets would show surviving residual lifts where
+forward targets do not. Current and forward targets were run together, on the same windows,
+encoders and probes, each residualised against the strongest raw control:
+
+| target | kind | trained | untrained | lift | in sd | survives |
+|---|---|---|---|---|---|---|
+| `spot_denoise` | current | +0.0065 | +0.0151 | -0.0086 | -1.43 | no |
+| `width_denoise` | current | +0.0274 | +0.0184 | +0.0090 | 2.24 | yes |
+| `vol_state_error` | current | +0.0257 | +0.0151 | +0.0107 | 1.42 | no |
+| **`fwd_realised_vol`** | **future** | **+0.1528** | **+0.1251** | **+0.0278** | **3.40** | **yes** |
+| `fwd_signed_return` | future | +0.0009 | +0.0021 | -0.0011 | -0.36 | no |
+
+One of three current targets survives and one of two forward ones does, and **the strongest
+surviving lift is on a FUTURE target**, which is the opposite of the prediction. Current versus
+forecast is not the axis. Finding 20's reading joins staleness, the target set, redundancy, noise
+and ingest poverty on the refuted list.
+
+### The result that matters: a lift finally survives
+
+**`fwd_realised_vol` is the first target in this programme where a training lift survives
+residualisation**, and it does so under all three conditions that E7c and E8c needed two failures to
+get right: the same arm clears zero (t = 119.3), beats the best untrained arm, and exceeds 2 pooled
+SD. It is not one lucky readout. Every readout shows it, at matched width:
+
+| readout | dim | untrained | trained |
+|---|---|---|---|
+| `concat_strikes` | 3072 | +0.1251 | +0.1528 |
+| `concat_patches` | 768 | +0.0600 | +0.1037 |
+| `mean_max` | 256 | +0.0328 | +0.0944 |
+| `mean_all` | 128 | +0.0471 | +0.0845 |
+| `last_patch` | 128 | +0.0321 | +0.0730 |
+
+Two separate things are visible here, and both are real. The **untrained** encoder already scores
++0.1251 on the residual, so the architecture as a random projection carries substantial information
+about future realised volatility that the best raw control misses. And **training adds +0.0278 on
+top of that**, after everything raw explains has been removed.
+
+### The headline was measured on the wrong target
+
+E7 reported "raw features still win" and E7c reported "reconstruction", and both were true **of
+`vol_forecast_error`**, the target this programme designated as its headline. On `fwd_realised_vol`,
+in the same E7 run, the numbers were already there and were never residualised:
+
+| arm | dim | ridge R² |
+|---|---|---|
+| trained `concat_strikes` | 3072 | **+0.2292** |
+| untrained `concat_strikes` | 3072 | +0.2013 |
+| best raw (`raw_last_4min`) | 384 | +0.1557 |
+
+The trained encoder beats the best raw control by +0.0735 there, and E11 now shows roughly +0.028 of
+that survives removing everything raw explains. The reason this was missed is a choice made for good
+reasons that turned out wrong: `vol_forecast_error` was designated the headline **because** it
+looked cleaner, having the market's own forecast divided out, and `fwd_realised_vol` was discounted
+in `causaljepa/targets.py` as "partly forecastable, so not a clean test on its own". The clean-looking
+target was the one whose lift was reconstruction. The messy one carried the real signal.
+
+### What this does and does not claim
+
+It does **not** overturn finding 8: at 19,200 steps the probes still degrade, and this is measured at
+600. It does not make anything tradeable; +0.028 residual R² on reconstructed one-minute volatility
+is not an edge after costs. It is one corpus, one asset class, one venue, at one budget.
+
+What it does establish is narrow and, after twenty findings of the opposite, worth stating plainly:
+**on this corpus the JEPA objective extracts information about future realised volatility that the
+raw cross-section does not carry, the effect is consistent across all five readouts, and it survives
+the control that killed every previous candidate.**
+
 ## What this work did not establish
 
 - ~~Whether a longer run separates the trained encoder from its random initialisation.~~
