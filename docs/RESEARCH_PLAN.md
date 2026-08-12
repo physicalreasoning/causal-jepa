@@ -388,10 +388,14 @@ reproduces the simulator's geometry on real data.
 
 ### Outcome: premise confirmed, model still loses
 
-**E8a PROCEEDED**, and it is finding 16, the one clean positive in the programme. `realised_corr`
-scores +0.1867 from BTC alone, +0.2520 from ETH alone and +0.3693 from both, a **+0.1064** gain over
-a width-matched duplicated ladder, rising monotonically with horizon. Targets that should not need
-both assets show no gain, which is the control that makes it credible.
+**E8a PROCEEDED.** `realised_corr` scores +0.1867 from BTC alone, +0.2520 from ETH alone and
++0.3693 from both, a +0.1064 gain over a width-matched duplicated ladder, rising monotonically with
+horizon. This was written up as the one clean positive in the programme, **and that was wrong**: the
+`eth_doubled` control holds dimension fixed but starves the comparison of the second asset by
+construction, and a correlation cannot be computed from one asset. Against the control that was
+missing, five plain numbers at +0.3462, the 768-dim ladder readout adds +0.0234 with a bootstrap CI
+of [-0.0389, +0.0840]. A single lagged correlation gets +0.2718 on its own. See the correction in
+finding 16; the gate here fired on a comparison that could not have come out any other way.
 
 **E8 came back PARTIAL.** Largest training signal in the programme, +0.0819 (+4.54 pooled SD) at the
 128-dim `last_patch` readout, and raw features still win by 6.58 pooled SD.

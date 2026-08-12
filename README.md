@@ -42,7 +42,7 @@ would have succeeded.
 | So why did it fail here? | The metric was mostly input reconstruction. Nearly the whole gap sat in a target the corpus code documents as derivable |
 | Would targets with real hidden state change it? | **No.** They produce a +7.7 sigma training lift that vanishes once you remove what raw features already explain |
 | Could you have known in advance? | **Yes.** Three of the four original targets classify as unusable in about a minute, with no training and no model |
-| Is there anything real in this data? | **Yes.** Realised correlation between paired BTC and ETH ladders needs both: +0.3693 against +0.2629 width-matched |
+| Is there anything real in this data? | Realised correlation is predictable at +0.3693, but one lagged number gets +0.2718 and the ladder adds nothing measurable |
 | Does a cross-sectional latent save the JEPA? | **No.** Its largest lift yet, +4.54 sigma, dissolves under the same control |
 
 The headline number, and the one that reframed everything else:

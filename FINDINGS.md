@@ -555,7 +555,7 @@ It also answers the obvious objection to E7. `vol_forecast_error` scores *higher
 than at the h=10 that E7 used (+0.1747), so 10 was not the flattering choice; the finding-14 lift
 was then replicated at h=5 anyway.
 
-## 16. Realised correlation between two assets is real, recoverable, and in neither ladder alone
+## 16. Realised correlation is predictable from paired ladders, and the ladder is not what predicts it
 
 Added 2026-08-12 from `results/crossasset_headroom.json`, E8a. Raw features only, no training.
 **This is the one unambiguously positive result in the programme**, and it is not about the model.
@@ -582,10 +582,42 @@ rather than the extra columns; E4 is why that control is not optional. It rises 
 horizon, +0.0271 at h=3, +0.0794 at h=5, +0.1064 at h=10, consistent with realised correlation being
 better estimated over longer windows.
 
-**The other rows are the control that makes this credible.** Targets that should not need both
-assets get no gain from the second ladder, and three of them come in slightly negative. Only the
-one quantity that is theoretically joint behaves as though it is joint. Nothing here is a width
-artefact or a fishing expedition.
+Targets that should not need both assets get no gain from the second ladder, and three of them
+come in slightly negative. Only the quantity that is theoretically joint behaves as though it is
+joint, so this is not a width artefact.
+
+### The correction, added the same day: the ladder is not doing the work
+
+**This finding was first written up claiming the above was "the one unambiguously positive result
+in the programme". That claim was wrong, and the control that shows it had not been run.** The
+comparison against `eth_doubled` holds dimension fixed but starves the comparison of the second
+asset *by construction*, and a correlation cannot be computed from one asset at all. So the
++0.1064 "cross-asset gain" is mostly the tautology that computing a correlation takes two things.
+
+The control that was missing is both assets at minimal feature count:
+
+| predictor for `realised_corr`, h=10 | dim | ridge R² |
+|---|---|---|
+| within-window realised correlation, **one number** | 1 | **+0.2718** |
+| log implied volatility of each asset | 2 | +0.2128 |
+| the above plus each asset's within-window realised volatility | 4 | +0.2214 |
+| **five numbers**: both implied vols, both realised vols, lagged correlation | 5 | **+0.3462** |
+| the 768-dim both-ladder readout | 768 | +0.3693 |
+
+Bootstrap over the test set, 2,000 resamples: the ladder readout's advantage over those five
+numbers is **+0.0234, 95% CI [-0.0389, +0.0840], P(>0) = 0.775**. Not distinguishable from zero.
+
+So what is actually true is much smaller than what was claimed. Future realised correlation is
+predictable, mostly because **correlation persists**, one lagged number carrying +0.2718 of it, and
+partly because it rises with volatility. Both are textbook. The 24-strike cross-sections that this
+whole repository is about contribute nothing detectable on top.
+
+**This is the fifth correction in this document and the first that is purely self-inflicted**: not
+a mis-worded gate, but a result written up before its control existed. It was caught by asking the
+question this programme asks of everything else, what does a trivial baseline get, roughly an hour
+after the claim was committed. That the same author who wrote findings 9, 10, 14 and 17 still
+shipped it is the most honest evidence in this document that the discipline has to be procedural
+rather than remembered.
 
 ## 17. The JEPA loses even where the latent provably exists, and the lift is reconstruction again
 
@@ -653,7 +685,11 @@ is still only as good as the failure modes its author imagined.
 - Whether any of this transfers off Kalshi hourly crypto. Two assets now, but one venue and one
   asset class. Finding 15 gives the cheap way to check before committing to another corpus.
 - Whether realised correlation between paired ladders is *tradeable*. Finding 16 says it is
-  recoverable at +0.3693 from raw features; nothing here touches costs, capacity or execution.
+  recoverable at +0.3693, but mostly by correlation persistence rather than by anything in the
+  ladder, and nothing here touches costs, capacity or execution.
+- Whether the ladder cross-section carries *any* dependence information. The +0.0234 it adds over
+  five plain numbers has a bootstrap interval straddling zero at n = 665 test windows. A larger
+  paired corpus could resolve it; this one cannot.
 - Whether the marginal causal-context effect in finding 4 survives more seeds. At t = 2.56 with
   n = 4 and six comparisons, it probably does not.
 - Anything about trading. No arm beats the raw cross-section, so none of this is deployable.
