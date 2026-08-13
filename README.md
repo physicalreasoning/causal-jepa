@@ -14,7 +14,7 @@
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-Apache%202.0-blue.svg"></a>
   <img alt="python" src="https://img.shields.io/badge/python-3.11%2B-blue.svg">
   <img alt="pytorch" src="https://img.shields.io/badge/pytorch-2.6-ee4c2c.svg">
-  <a href="FINDINGS.md"><img alt="findings" src="https://img.shields.io/badge/findings-21-success.svg"></a>
+  <a href="FINDINGS.md"><img alt="findings" src="https://img.shields.io/badge/findings-21%20%2B%201%20open-success.svg"></a>
   <a href="docs/RESEARCH_PLAN.md"><img alt="pre-registered" src="https://img.shields.io/badge/gates-pre--registered-informational.svg"></a>
 </p>
 

@@ -951,8 +951,14 @@ in the same E7 run, the numbers were already there and were never residualised:
 | untrained `concat_strikes` | 3072 | +0.2013 |
 | best raw (`raw_last_4min`) | 384 | +0.1557 |
 
-The trained encoder beats the best raw control by +0.0735 there, and E11 now shows roughly +0.028 of
-that survives removing everything raw explains. The reason this was missed is a choice made for good
+**Correction, same day: these two blocks are not the same quantity.** The residual figures above come
+from `causaljepa/statetargets.py` at `half=5`, where `fwd_realised_vol` is realised volatility over
+the next FIVE minutes. This table comes from E7's `causaljepa/targets.py` at `horizon=10`, over TEN
+minutes, on a different surviving-window set. The name is shared and the measurement is not. The gap
+matters: the untrained residual floor for `concat_strikes` is +0.1251 at five minutes and +0.0195 at
+ten. So the E11 result stands on its own, and this table should be read as a separate observation
+that the encoder also beats raw features on the ten-minute version, NOT as the same number
+residualised. The ten-minute version has not been residualised. The reason this was missed is a choice made for good
 reasons that turned out wrong: `vol_forecast_error` was designated the headline **because** it
 looked cleaner, having the market's own forecast divided out, and `fwd_realised_vol` was discounted
 in `causaljepa/targets.py` as "partly forecastable, so not a clean test on its own". The clean-looking
@@ -968,6 +974,50 @@ What it does establish is narrow and, after twenty findings of the opposite, wor
 **on this corpus the JEPA objective extracts information about future realised volatility that the
 raw cross-section does not carry, the effect is consistent across all five readouts, and it survives
 the control that killed every previous candidate.**
+
+## 22. E12, open: finding 8 may be a wide-readout artefact. One seed, undecided.
+
+Added 2026-08-12 from `results/convergence_v2.json`, E12. **This experiment is INCOMPLETE and its
+gate returned UNDECIDABLE. Nothing here is a finding yet.** It is recorded because it casts
+specific doubt on finding 8, which is leg 1 of the kill criterion, and leaving that undocumented
+would be worse than publishing an unfinished run.
+
+E1 concluded that 32x compute drives the probe 23 pooled SD below an untrained encoder. It was run
+before finding 10 existed and carries two defects that finding 21 showed are exactly the ones that
+hide real results: it probed the ORIGINAL FOUR TARGETS, which finding 10 showed cannot detect
+learning, through `represent_all`, which is `mean_all`, the readout finding 9 identified as the
+worst. E12 re-runs it against `fwd_realised_vol` residualised against the strongest raw control, so
+a rising curve cannot be reconstruction, and probes every readout rather than one.
+
+**Seed 0 only, 9,600 steps, residual ridge R² against each readout's own untrained floor:**
+
+| readout | dim | floor | 600 | 1200 | 2400 | 4800 | 9600 |
+|---|---|---|---|---|---|---|---|
+| `last_patch` | 128 | +0.0264 | +0.0497 | +0.0515 | +0.0602 | +0.0832 | **+0.0902** |
+| `mean_max` | 256 | +0.0295 | +0.0959 | +0.1039 | +0.0825 | +0.0854 | +0.0878 |
+| `concat_patches` | 768 | +0.0560 | +0.0811 | +0.0740 | +0.0824 | +0.0828 | +0.0850 |
+| `mean_all` | 128 | +0.0529 | +0.0857 | +0.0785 | +0.0620 | +0.0767 | +0.0805 |
+| `concat_strikes` | 3072 | +0.1259 | +0.1489 | +0.1395 | +0.1181 | +0.0744 | **+0.0652** |
+
+Four of five readouts end ABOVE their untrained floor and `last_patch` rises monotonically
+throughout. Only `concat_strikes`, at 3072 dimensions against 16,412 training rows, collapses to
+0.061 BELOW its own floor.
+
+**The hypothesis this suggests, and it is only a hypothesis:** finding 8's degradation may be a
+property of wide readouts overfitting rather than of training destroying information, and E1 could
+not have seen the difference because it only ever measured `mean_all`.
+
+**Why it is not a finding.** One complete seed. No pooled standard deviations, so no threshold in
+this repository's units can be evaluated, and the gate correctly refused to return a verdict rather
+than ruling off zero variance. A second seed reached 4,800 steps and was discarded whole, because a
+seed contributing some checkpoints and not others changes n between columns of the same table.
+
+**Also note the budget.** This ran to 9,600 steps, not E1's 19,200, so it is 16x the baseline rather
+than 32x and is not a step-for-step replication.
+
+**What would settle it:** three complete seeds at 19,200 steps, all readouts, same protocol.
+`scripts/convergence_v2.py --resume --only-seed N` runs one seed per invocation and reloads prior
+results, so it can be completed in chunks or moved to a hosted GPU without re-running what is done.
 
 ## What this work did not establish
 
