@@ -207,6 +207,15 @@ does not bias comparisons between them, but an absolute R² here is not an R² a
 realised volatility. And every probe is linear or a fixed small MLP on a frozen encoder, so this
 bounds what is *linearly accessible*, not what a fine-tuned model could extract.
 
+The same pattern has since been reported at a much larger scale. Merchant et al. [12] compare 18
+encoder objectives, LeJEPA among them, on about a trillion one-second US equity observations with
+frozen probes: a randomly initialised encoder with a well-fit probe is a strong baseline that
+self-supervised objectives beat only modestly, supervised encoders beat self-supervised ones, and
+how well a representation forecasts is nearly unrelated to how it organises latent structure
+(rank correlation −0.19). That is this repo's result (no JEPA arm beats raw inputs, and the
+diagnostics did not predict which arm would do best) on a different market and two to three
+orders of magnitude more data.
+
 ## References
 
 1. Assran et al. *I-JEPA.* [arXiv:2301.08243](https://arxiv.org/abs/2301.08243), 2023.
@@ -220,6 +229,7 @@ bounds what is *linearly accessible*, not what a fine-tuned model could extract.
 9. Hewitt & Liang. *Designing and Interpreting Probes with Control Tasks.* [arXiv:1909.03368](https://arxiv.org/abs/1909.03368), 2019. Control tasks and probe selectivity; the prior art for the untrained-encoder control used throughout this repo.
 10. Belinkov. *Probing Classifiers: Promises, Shortcomings, and Advances.* [arXiv:2102.12452](https://arxiv.org/abs/2102.12452), 2022.
 11. Asano, Rupprecht & Vedaldi. *A critical analysis of self-supervision, or what we can learn from a single image.* [arXiv:1904.13132](https://arxiv.org/abs/1904.13132), 2019. Early layers of several SSL methods learn as well from one image as from millions, which is why an untrained encoder is a strong baseline rather than a formality.
+12. Merchant, Guthrie, Mahns, Balestriero & Levy. *Towards Financial World Modeling.* [arXiv:2610.09048](https://arxiv.org/abs/2610.09048), 2026. Eighteen encoder objectives on Market-1T (one-second US equities, 2008-2025) under frozen-probe evaluation; an independent, larger-scale replication of the untrained-encoder and diagnostic findings here.
 
 ## Citation
 
